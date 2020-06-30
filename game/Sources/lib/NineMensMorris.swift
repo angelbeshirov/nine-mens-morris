@@ -24,13 +24,13 @@ public class Runner {
         while player1.hasPieces() || player2.hasPieces() {
             if player1Turn {
                 print("Player 1 please enter coordinates to place a piece:");
-                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
+                let coordinates: (Int) = ioUtil.getSingleCoordinates();
                 player1.assign(index: coordinates);
                 player1Turn = false;
                 print("Player 1, you have \(player1.getPieces()) left");
             } else {
                 print("Player 2 please enter coordinates to place a piece:");
-                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
+                let coordinates: (Int) = ioUtil.getSingleCoordinates();
                 player2.assign(index: coordinates);
                 player1Turn = true;
                 print("Player 2, you have \(player2.getPieces()) left");
@@ -44,16 +44,14 @@ public class Runner {
         while player1.getPlacedPieces() > 2 && player2.getPlacedPieces() > 2 {
             if player1Turn {
                 print("Player 1 please enter coordinates to move a piece");
-                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
-                player1.assign(index: coordinates);
+                let coordinates: (Int, Int) = ioUtil.getDoubleCoordinates();
+                player1.movePiece(index1: coordinates.0, index2: coordinates.1);
                 player1Turn = false;
-                print("Player 1, you have \(player1.getPieces()) left");
             } else {
-                print("Player 2 please enter coordinates to place a piece:");
-                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
-                player2.assign(index: coordinates);
+                print("Player 2 please enter coordinates to move a piece:");
+                let coordinates: (Int, Int) = ioUtil.getDoubleCoordinates();
+                player2.movePiece(index1: coordinates.0, index2: coordinates.1);
                 player1Turn = true;
-                print("Player 2, you have \(player2.getPieces()) left");
             }
 
             board.visualize();

@@ -3,12 +3,19 @@ public class Player {
     var board: Board;
     // var initialPieces: Int;
     var placedPieces: Int;
+    var oppositeMarker: Piece;
 
     public init(color: Color, board: Board) {
         self.color = color;
         self.board = board;
         // self.initialPieces = 9;
         self.placedPieces = 0;
+
+        if self.color == Color.black {
+            self.oppositeMarker = Piece.white;
+        } else {
+            self.oppositeMarker = Piece.black;
+        }
     }
 
     public func assign(index: Int) {
@@ -23,21 +30,22 @@ public class Player {
             return;
         }
 
-        let pieceMarker: Piece;
-
-        if color == Color.black {
-            pieceMarker = Piece.white;
-        } else {
-            pieceMarker = Piece.black;
-        }
-
-        if pieceMarker == piece {
+        if self.oppositeMarker == piece {
             board.remove(index: index);
         }
     }
 
     public func movePiece(index1: Int, index2: Int) {
-        board.move(from: index1, to: index2);
+        
+        guard let piece1 = board.getPieceAt(at: index1), let piece2 = board.getPieceAt(at: index2) else {
+            return;
+        }
+
+        if self.oppositeMarker != piece1 {
+            board.move(from: index1, to: index2);
+        }
+
+        // TODO shouldnt we use only 1 marker?
     }
 
     public func hasPieces() -> Bool {

@@ -67,7 +67,7 @@ class IOUtil {
         return (colorPlayer1, colorPlayer2)
     }
 
-    public func getPlaceCoordinates() -> (Int) {
+    public func getSingleCoordinates() -> (Int) {
 
         print("Please enter coordinate for piece placement:")
 
@@ -80,7 +80,7 @@ class IOUtil {
         return -1;
     }
 
-    public func getMoveCoordinates() -> (Int, Int) {
+    public func getDoubleCoordinates() -> (Int, Int) {
         if let input = readLine(), 
         input.count == 4, 
         let numericCoordinate1 = self.coordinateMapping[String(input.prefix(2))], 
