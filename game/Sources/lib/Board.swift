@@ -20,12 +20,59 @@ public class Board {
             return;
         }
 
+        if pieces[index] != Piece.empty {
+            // throw exception
+            // square is already filled
+            return;
+        }
+
+        // might be possible to unify this enum?
         switch color {
         case .black:
             pieces[index] = Piece.black;
         case .white:
             pieces[index] = Piece.white
         }
+    }
+
+    public func remove(index: Int) {
+        if index >= 24 {
+            // throw exception
+            return;
+        }
+
+        if pieces[index] == Piece.empty {
+            return;
+            // can not remove empty piece
+        }
+        // the logic whether a player is removing his own piece should be done in the player class
+
+        pieces[index] = Piece.empty;
+    }
+
+    public func move(from: Int, to: Int) {
+        if from >= 24 || to >= 24 {
+            // throw exception
+            return;
+        }
+
+
+        // maybe change to guards
+        if pieces[from] == Piece.empty || pieces[to] != Piece.empty {
+            return;
+            // can not remove empty piece
+        }
+
+        pieces[to] = pieces[from];
+        pieces[from] = Piece.empty;
+    }
+
+    public func getPieceAt(at: Int) -> Piece? {
+        if at >= 24 {
+            return nil;
+        }
+
+        return pieces[at];
     }
 
     public func visualize() {

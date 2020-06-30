@@ -4,45 +4,59 @@ public enum Color: String {
 }
 
 public class Runner {
-    public init() {
 
+    public init() {
+        // TODO initialize in a smarter way
     }
 
     public func start() {
-        let colors: (Color, Color) = chooseColors();
+        let ioUtil: IOUtil = IOUtil();
+        let colors: (Color, Color) = ioUtil.getPlayerColors();
 
         let board = Board(size: 7);
-        board.assign(index: 5, color: Color.white)
+        let player1: Player = Player(color: colors.0, board: board);
+        let player2: Player = Player(color: colors.1, board: board);
+
+        var player1Turn = true;
+
         board.visualize();
-    }
 
-    public func chooseColors() -> (Color, Color) {
-        var colorPlayer1: Color = Color.black; // TODO this should be initialized directly without this initial black value
-        var colorPlayer2: Color = Color.black;
-
-        print("Player 1, please enter the color of your pools [black/white]:")
-        while let choice = readLine() {
-            let lowerCased = choice.lowercased()
-            
-            if let color = Color(rawValue: lowerCased) {
-                colorPlayer1 = color;
-                switch color {
-                case .black:
-                    colorPlayer2 = Color.white
-                case .white:
-                    colorPlayer2 = Color.black
-                }
-                break;
+        while player1.hasPieces() || player2.hasPieces() {
+            if player1Turn {
+                print("Player 1 please enter coordinates to place a piece:");
+                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
+                player1.assign(index: coordinates);
+                player1Turn = false;
+                print("Player 1, you have \(player1.getPieces()) left");
             } else {
-                print("Invalid choice, please enter either [black/white]")
+                print("Player 2 please enter coordinates to place a piece:");
+                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
+                player2.assign(index: coordinates);
+                player1Turn = true;
+                print("Player 2, you have \(player2.getPieces()) left");
             }
+
+            board.visualize();
         }
 
-        print("");
-        print("The game has started!");
-        print("Player 1 has the \(colorPlayer1) color")
-        print("Player 2 has the \(colorPlayer2) color")
+        // phase 2 (adjacent positions only)
 
-        return (colorPlayer1, colorPlayer2)
+        while player1.getPlacedPieces() > 2 && player2.getPlacedPieces() > 2 {
+            if player1Turn {
+                print("Player 1 please enter coordinates to move a piece");
+                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
+                player1.assign(index: coordinates);
+                player1Turn = false;
+                print("Player 1, you have \(player1.getPieces()) left");
+            } else {
+                print("Player 2 please enter coordinates to place a piece:");
+                let coordinates: (Int) = ioUtil.getPlaceCoordinates();
+                player2.assign(index: coordinates);
+                player1Turn = true;
+                print("Player 2, you have \(player2.getPieces()) left");
+            }
+
+            board.visualize();
+        }
     }
 }
