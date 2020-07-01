@@ -1,115 +1,89 @@
-extension String {
-    subscript (i: Int) -> Character {
-        get {
-            return self[self.index(self.startIndex, offsetBy: i)]
-        }
-    }
-}
-
-class IOUtil {
-
-    var coordinateMapping: [String: Int] = [String: Int]();
+public class IOUtil {
 
     public init() {
-        self.coordinateMapping["a1"] = 0;
-        self.coordinateMapping["d1"] = 1;
-        self.coordinateMapping["g1"] = 2;
-        self.coordinateMapping["b2"] = 3;
-        self.coordinateMapping["d2"] = 4;
-        self.coordinateMapping["f2"] = 5;
-        self.coordinateMapping["c3"] = 6;
-        self.coordinateMapping["d3"] = 7;
-        self.coordinateMapping["e3"] = 8;
-        self.coordinateMapping["a4"] = 9;
-        self.coordinateMapping["b4"] = 10;
-        self.coordinateMapping["c4"] = 11;
-        self.coordinateMapping["e4"] = 12;
-        self.coordinateMapping["f4"] = 13;
-        self.coordinateMapping["g4"] = 14;
-        self.coordinateMapping["c5"] = 15;
-        self.coordinateMapping["d5"] = 16;
-        self.coordinateMapping["e5"] = 17;
-        self.coordinateMapping["b6"] = 18;
-        self.coordinateMapping["d6"] = 19;
-        self.coordinateMapping["f6"] = 20;
-        self.coordinateMapping["a7"] = 21;
-        self.coordinateMapping["d7"] = 22;
-        self.coordinateMapping["g7"] = 23;
+ 
     }
 
-    public func getPlayerColors() -> (Color, Color) {
-        var colorPlayer1: Color = Color.black; // TODO this should be initialized directly without this initial black value
-        var colorPlayer2: Color = Color.black;
+    public func getPlayerColors() throws -> (PlayerColor, PlayerColor) {
+        var player1Color: PlayerColor? = nil
+        var player2Color: PlayerColor? = nil
 
         print("Please enter the color of the pools for player 1 [black/white]:")
-        while let choice = readLine() {
-            let lowerCased = choice.lowercased()
+        while let input = readLine() {
+            let choice = input.lowercased()
             
-            if let color = Color(rawValue: lowerCased) {
-                colorPlayer1 = color;
+            if let color = PlayerColor(rawValue: choice) {
+                player1Color = color
                 switch color {
                 case .black:
-                    colorPlayer2 = Color.white
+                    player2Color = PlayerColor.white
                 case .white:
-                    colorPlayer2 = Color.black
+                    player2Color = PlayerColor.black
                 }
-                break;
+                break
             } else {
                 print("Invalid choice, please enter either [black/white]")
             }
         }
 
-        print("");
-        print("The game has started!");
-        print("Player 1 has the \(colorPlayer1) color")
-        print("Player 2 has the \(colorPlayer2) color")
-
-        return (colorPlayer1, colorPlayer2)
-    }
-
-    public func getSingleCoordinates() -> (Int) {
-
-        print("Please enter coordinate for piece placement:")
-
-        if let input = readLine(), let numericCoordinate = self.coordinateMapping[input] {
-            return numericCoordinate;
+        guard let player1FinalColor = player1Color, let player2FinalColor = player2Color else {
+            throw IOError.FailedToGetInitialColors
         }
 
-        // TODO IOException can be thrown here?
-
-        return -1;
+        return (player1FinalColor, player2FinalColor)
     }
 
-    public func getDoubleCoordinates() -> (Int, Int) {
-        if let input = readLine(), 
-        input.count == 4, 
-        let numericCoordinate1 = self.coordinateMapping[String(input.prefix(2))], 
-        let numericCoordinate2 = self.coordinateMapping[String(input.suffix(2))] {
-            return (numericCoordinate1, numericCoordinate2);
+    public func getSingleCoordinates() throws -> (Int) {
+        var coordinate1d: Int? = nil;
+        
+        //print("Please enter coordinate for piece placement [a-h][1-8]:")
+
+        while let input = readLine() {
+            let coord2d = input.lowercased()
+
+            if let transformedCoordinate = BoardConstants.coordinateMapping[coord2d] {
+                coordinate1d = transformedCoordinate
+                break
+            } else {
+                print("The coordinate you have entered does not exist on this board, please try again");
+            }
         }
 
-        return (-1, -1)
+        guard let finalCoordinate = coordinate1d else {
+            throw IOError.FailedToGetCoordinates
+        }
+
+        return finalCoordinate
     }
 
-        // public func getPlaceCoordinates() -> (Character, Int) {
-        //     var firstCoordinate: Character = "a";
-        //     var secondCoordinate: Int = -1;
+    public func getDoubleCoordinates() throws -> (Int, Int) {
+        var coordinate1dFirst: Int? = nil;
+        var coordinate1dSecond: Int? = nil;
+        
+        //print("Please enter coordinate for piece placement [a-h][1-8]:")
 
-        //     print("Please enter coordinate for piece placement:")
+        while let input = readLine() {
+            guard input.count == 4 else {
+                print("The coordinate you have entered is invalid, please try again");
+                continue
+            }
 
-        //     if let input = readLine() {
-        //         if input.count != 2 || Int(input[0].asciiValue! - Character("a").asciiValue!) < 0 || 
-        //         Int(input[0].asciiValue! - Character("a").asciiValue!) > 6 ||
-        //         !input[1].isWholeNumber || input[1].wholeNumberValue! < 1 || input[1].wholeNumberValue! > 7 {
-        //             print("Invalid input! Will throw something here later on!");
-        //         }
+            let move2dCoord = input.lowercased()
 
-        //         firstCoordinate = input[0];
-        //         secondCoordinate = input[1].wholeNumberValue!;
-        //     }
+            if let transformedCoordinateFirst = BoardConstants.coordinateMapping[String(move2dCoord.prefix(2))],
+               let transformedCoordinateSecond = BoardConstants.coordinateMapping[String(move2dCoord.suffix(2))] {
+                coordinate1dFirst = transformedCoordinateFirst
+                coordinate1dSecond = transformedCoordinateSecond
+            } else {
+                print("The coordinate you have entered is invalid, please try again");
+            }
+        }
 
-        //     // TODO IOException can be thrown here?
+        guard let finalCoordinate1dFirst = coordinate1dFirst, 
+              let finalCoordinate1dSecond = coordinate1dSecond else {
+            throw IOError.FailedToGetCoordinates
+        }
 
-        //     return (firstCoordinate, secondCoordinate)
-        // }
+        return (finalCoordinate1dFirst, finalCoordinate1dSecond)
+    }
 }

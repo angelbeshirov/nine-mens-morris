@@ -1,78 +1,57 @@
-public enum Piece: String {
-    case empty = "·"
-    case white = "○"
-    case black = "●"
-}
-
 public class Board {
 
-    var size: Int;
-    var pieces: [Piece];
+    private var range = (0...23);
 
-    public init(size: Int) {
-        self.size = size;
-        self.pieces = Array(repeating: Piece.empty, count: 24)
+    var size: Int
+    var pieces: [PieceType]
+
+    // var lostGame: Bool {
+    //     get {
+    //         return hasLost()
+    //     }
+    // }
+
+    public init(_size: Int) {
+        self.size = _size
+        self.pieces = Array(repeating: PieceType.empty, count: _size)
     }
 
-    public func assign(index: Int, color: Color) {
-        if index >= 24 {
-            // throw exception
-            return;
-        }
-
-        if pieces[index] != Piece.empty {
-            // throw exception
-            // square is already filled
-            return;
-        }
-
-        // might be possible to unify this enum?
-        switch color {
-        case .black:
-            pieces[index] = Piece.black;
-        case .white:
-            pieces[index] = Piece.white
+    public func assign(index: Int, color: PlayerColor) throws {
+        // TODO check if there is any point in separating this into 2 exception
+        if range.contains(index) && pieces[index] == PieceType.empty {
+            pieces[index] = color.pieceType
+        } else {
+            throw InputError.InvalidPieceID
         }
     }
 
-    public func remove(index: Int) {
-        if index >= 24 {
-            // throw exception
-            return;
+    public func remove(index: Int) throws {
+        if range.contains(index) && pieces[index] == PieceType.empty {
+            pieces[index] = PieceType.empty
+        } else {
+            throw InputError.InvalidPieceID
         }
-
-        if pieces[index] == Piece.empty {
-            return;
-            // can not remove empty piece
-        }
-        // the logic whether a player is removing his own piece should be done in the player class
-
-        pieces[index] = Piece.empty;
     }
 
-    public func move(from: Int, to: Int) {
-        if from >= 24 || to >= 24 {
-            // throw exception
-            return;
+    public func move(from: Int, to: Int) throws {
+        guard range.contains(from) && range.contains(to) else {
+            throw InputError.InvalidPieceID
         }
 
-
-        // maybe change to guards
-        if pieces[from] == Piece.empty || pieces[to] != Piece.empty {
-            return;
-            // can not remove empty piece
+        guard pieces[from] != PieceType.empty && pieces[to] == PieceType.empty else {
+            throw InputError.InvalidMovePieceID
         }
 
-        pieces[to] = pieces[from];
-        pieces[from] = Piece.empty;
+        pieces[to] = pieces[from]
+        pieces[from] = PieceType.empty
     }
 
-    public func getPieceAt(at: Int) -> Piece? {
-        if at >= 24 {
-            return nil;
+    public func getPieceAt(at: Int) -> PieceType? {
+        if !range.contains(at) {
+            return nil
         }
 
-        return pieces[at];
+        return pieces[at]
     }
 
     public func visualize() {

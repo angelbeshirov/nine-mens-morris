@@ -1,6 +1,4 @@
 import lib
 
-let game = Runner()
-game.start()
-
-// print("Hello, world!")
+let gamePlayer = GamePlayer()
+gamePlayer.startConsoleGame()
