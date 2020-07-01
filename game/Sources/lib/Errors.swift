@@ -7,5 +7,6 @@ enum IOError: Error {
 
 enum InputError: Error {
     case InvalidPieceID
-    case InvalidMovePieceID
+    case InvalidMovePieceIDs
+    case InvalidRemoveID
 }

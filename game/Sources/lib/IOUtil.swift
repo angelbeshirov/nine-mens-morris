@@ -59,8 +59,6 @@ public class IOUtil {
     public func getDoubleCoordinates() throws -> (Int, Int) {
         var coordinate1dFirst: Int? = nil;
         var coordinate1dSecond: Int? = nil;
-        
-        //print("Please enter coordinate for piece placement [a-h][1-8]:")
 
         while let input = readLine() {
             guard input.count == 4 else {
@@ -74,6 +72,7 @@ public class IOUtil {
                let transformedCoordinateSecond = BoardConstants.coordinateMapping[String(move2dCoord.suffix(2))] {
                 coordinate1dFirst = transformedCoordinateFirst
                 coordinate1dSecond = transformedCoordinateSecond
+                break
             } else {
                 print("The coordinate you have entered is invalid, please try again");
             }

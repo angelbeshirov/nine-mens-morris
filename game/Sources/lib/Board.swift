@@ -39,7 +39,7 @@ public class Board {
         }
 
         guard pieces[from] != PieceType.empty && pieces[to] == PieceType.empty else {
-            throw InputError.InvalidMovePieceID
+            throw InputError.InvalidMovePieceIDs
         }
 
         pieces[to] = pieces[from]

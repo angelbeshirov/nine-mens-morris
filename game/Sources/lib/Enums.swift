@@ -22,6 +22,14 @@ public enum PlayerColor: String {
     }
 }
 
+public enum GameState {
+    case placingPieces
+    case movingPieces
+    case flyingPieces
+    case gameOver
+    case undefined
+}
+
 // this can be extended to support vs computer
 public enum PlayerType: String {
     case player1 = "Player 1"

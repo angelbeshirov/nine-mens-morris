@@ -1,13 +1,11 @@
 public class Player {
     var color: PlayerColor
     var board: Board
-    // var initialPieces: Int
     var placedPieces: Int
 
     public init(color: PlayerColor, board: Board) {
         self.color = color
         self.board = board
-        // self.initialPieces = 9
         self.placedPieces = 0
     }
 
@@ -23,6 +21,8 @@ public class Player {
 
         if color.pieceType != piece {
             try board.remove(index: index)
+        } else {
+            throw InputError.InvalidRemoveID
         }
     }
 
@@ -34,9 +34,9 @@ public class Player {
 
         if color.pieceType == piece1 {
             try board.move(from: index1, to: index2)
+        } else {
+            throw InputError.InvalidMovePieceIDs
         }
-
-        // TODO shouldnt we use only 1 marker?
     }
 
     public func hasPieces() -> Bool {

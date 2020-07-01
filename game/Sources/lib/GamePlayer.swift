@@ -20,7 +20,7 @@ public class GamePlayer {
             try game = ConsoleGame(ioUtil: ioService)
             try game!.startPlacingPhase()
             try game!.startMovingPhase()
-            // game!.startFlyingPhase()
+            try game!.startFlyingPhase()
         } catch {
             //change this to be handled by ErrorHandler
             print("Critical error encountered: \(error)")
