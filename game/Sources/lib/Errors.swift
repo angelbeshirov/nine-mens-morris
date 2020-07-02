@@ -5,8 +5,11 @@ enum IOError: Error {
     case FailedToGetCoordinates
 }
 
-enum InputError: Error {
+enum InputError: Error { // can be changed to board error
     case InvalidPieceID
-    case InvalidMovePieceIDs
-    case InvalidRemoveID
+    case InvalidAssignPieceID
+    case InvalidMovePieceID
+    case InvalidRemovePieceID
+    case InvalidRemovePieceID_freePieces // sth else?
+    case InvalidMovePieceIDs_notAdjacent
 }

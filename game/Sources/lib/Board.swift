@@ -1,57 +1,108 @@
-public class Board {
+import Foundation
 
-    private var range = (0...23);
+public class Board {
 
     var size: Int
     var pieces: [PieceType]
-
-    // var lostGame: Bool {
-    //     get {
-    //         return hasLost()
-    //     }
-    // }
+    var mills: [Mill]
 
     public init(_size: Int) {
         self.size = _size
         self.pieces = Array(repeating: PieceType.empty, count: _size)
-    }
+        self.mills = [Mill]()
 
-    public func assign(index: Int, color: PlayerColor) throws {
-        // TODO check if there is any point in separating this into 2 exception
-        if range.contains(index) && pieces[index] == PieceType.empty {
-            pieces[index] = color.pieceType
-        } else {
-            throw InputError.InvalidPieceID
+        for (id, element) in BoardConstants.millIndices.enumerated() {
+            mills.append(Mill(id: id, ids: element))
         }
     }
 
-    public func remove(index: Int) throws {
-        if range.contains(index) && pieces[index] == PieceType.empty {
-            pieces[index] = PieceType.empty
-        } else {
+    public func assign(index: Int, color: PlayerColor) throws -> Bool {
+        guard BoardConstants.range.contains(index) else {
             throw InputError.InvalidPieceID
         }
+
+        guard pieces[index] == PieceType.empty else {
+            throw InputError.InvalidAssignPieceID
+        }
+
+        let millsForIndex = mills.filter { (mill) in mill.hasIdAndEmpty(id: index) }
+        let millsFormed = millsForIndex.map{ $0.isFormed }
+
+        pieces[index] = color.pieceType
+        try millsForIndex.forEach { (mill) in try mill.assign(index: index, pieceType: color.pieceType)}
+
+        let millsFormedAfterAssignment = millsForIndex.map{ $0.isFormed }
+
+        return millsFormed != millsFormedAfterAssignment
     }
 
-    public func move(from: Int, to: Int) throws {
-        guard range.contains(from) && range.contains(to) else {
+    public func remove(index: Int, opponentPieceType: PieceType) throws {
+        guard BoardConstants.range.contains(index) else {
+            throw InputError.InvalidPieceID
+        }
+
+        guard pieces[index] != PieceType.empty && pieces[index] == opponentPieceType else {
+            throw InputError.InvalidRemovePieceID
+        }
+        
+        let partOfCompetedMill = mills.filter { (mill) in mill.hasId(id: index) && mill.isFormed }.count > 0
+
+        if partOfCompetedMill {
+            let opponenetIndices: [Int] = pieces.enumerated()
+                .filter { (idx, type) in type == opponentPieceType }
+                .map { (idx, type) in return idx }
+
+            var allAreMills: Bool = true
+            
+            for idx in opponenetIndices {
+                if (mills.filter { (mill) in mill.hasId(id: idx) && mill.isFormed }.count == 0) {
+                    allAreMills = false
+                    break
+                }
+            }
+
+            if !allAreMills {
+                throw InputError.InvalidRemovePieceID_freePieces
+            }
+        }
+
+        try doRemove(index: index)
+    }
+
+    // TODO add the check for mill
+    // TODO add the adjacent check
+    // check if next is occupied
+    public func move(from: Int, to: Int) throws -> Bool {
+        guard BoardConstants.range.contains(from) && BoardConstants.range.contains(to) else {
             throw InputError.InvalidPieceID
         }
 
         guard pieces[from] != PieceType.empty && pieces[to] == PieceType.empty else {
-            throw InputError.InvalidMovePieceIDs
+            throw InputError.InvalidMovePieceID
         }
 
+        guard isAdjacent(element: from, adjacentTo: to) else {
+            throw InputError.InvalidMovePieceIDs_notAdjacent
+        }
+
+        let millsForIndex = mills.filter { (mill) in mill.hasIdAndEmpty(id: to) } // why empty?
+        let millsFormed = millsForIndex.map{ $0.isFormed }
+
         pieces[to] = pieces[from]
-        pieces[from] = PieceType.empty
+        try doRemove(index: from)
+
+        try millsForIndex.forEach { (mill) in try mill.assign(index: to, pieceType: pieces[to])}
+        let millsFormedAfterAssignment = millsForIndex.map{ $0.isFormed }
+
+        return millsFormed != millsFormedAfterAssignment
     }
 
     public func getPieceAt(at: Int) -> PieceType? {
-        if !range.contains(at) {
-            return nil
+        if BoardConstants.range.contains(at) {
+            return pieces[at]
         }
 
-        return pieces[at]
+        return nil
     }
 
     public func visualize() {
@@ -70,5 +121,15 @@ public class Board {
         print("6   |   \(pieces[18].rawValue)-------\(pieces[19].rawValue)-------\(pieces[20].rawValue)   |")
         print("    |           |           |")
         print("7   \(pieces[21].rawValue)-----------\(pieces[22].rawValue)-----------\(pieces[23].rawValue)")
+    }
+
+    private func doRemove(index: Int) throws {
+        pieces[index] = PieceType.empty
+        let millsForIndex = mills.filter { (mill) in mill.hasId(id: index) }
+        try millsForIndex.forEach { (mill) in try mill.remove(index: index)}
+    }
+
+    private func isAdjacent(element index1: Int, adjacentTo index2: Int) -> Bool {
+        return BoardConstants.nodeNeighbours[index1].contains(index2)
     }
 }

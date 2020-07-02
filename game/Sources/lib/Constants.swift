@@ -55,7 +55,7 @@ struct BoardConstants {
         [14, 22]
     ]
     
-    static let millNodes = [
+    static let millIndices = [
         // Horizontal mills
         [0, 1, 2],
         [3, 4, 5],
@@ -74,6 +74,8 @@ struct BoardConstants {
         [5, 13, 20],
         [2, 14, 23]
     ]
+
+    static let range = (0...23);
 }
 
 struct GameConstants {
