@@ -23,7 +23,7 @@ public class ConsoleIOHandler {
         }
 
         guard let player1FinalColor = player1Color, let player2FinalColor = player2Color else {
-            throw IOError.FailedToGetInitialColors
+            throw IOError.failedToGetInitialColors
         }
 
         return (player1FinalColor, player2FinalColor)
@@ -44,7 +44,7 @@ public class ConsoleIOHandler {
         }
 
         guard let finalCoordinates = coordinates1d else {
-            throw IOError.FailedToGetCoordinates
+            throw IOError.failedToGetCoordinates
         }
 
         return finalCoordinates
@@ -74,7 +74,7 @@ public class ConsoleIOHandler {
 
         guard let finalCoordinates1dFirst = coordinates1dFirst, 
               let finalCoordinates1dSecond = coordinates1dSecond else {
-            throw IOError.FailedToGetCoordinates
+            throw IOError.failedToGetCoordinates
         }
 
         return (finalCoordinates1dFirst, finalCoordinates1dSecond)

@@ -1,5 +1,6 @@
 class Mill {
-    private var pieces: [Int: PieceType] // pieceIndex -> PieceType
+    // pieceIndex (0-23) -> PieceType
+    private var pieces: [Int: PieceType] 
     private var _isFormed: Bool
 
     // computed property to check whether the mill is completed or not
@@ -10,7 +11,7 @@ class Mill {
     }
 
     public init(indices: [Int]) {
-        self.pieces = [Int: PieceType]() // mapping from id to piece type
+        self.pieces = [Int: PieceType]()
         self._isFormed = false
         for index in indices {
             pieces[index] = PieceType.empty
@@ -25,23 +26,18 @@ class Mill {
         return pieces[index] == PieceType.empty
     }
 
-    func assign(index: Int, pieceType: PieceType) throws {
-        guard hasIndexAndEmpty(index: index) else {
-            throw InputError.InvalidAssignPieceID
-        }
+    // composition (handles also the nil case)
+    func hasIndexAndNotEmpty(index: Int) -> Bool {
+        return hasIndex(index: index) && !hasIndexAndEmpty(index: index)
+    }
 
+    func assign(index: Int, pieceType: PieceType) {
         pieces[index] = pieceType
-
         _isFormed = isMillFormed()
     }
 
-    func remove(index: Int) throws {
-        guard hasIndex(index: index) && !hasIndexAndEmpty(index: index) else {
-            throw InputError.InvalidRemovePieceID
-        }
-
+    func remove(index: Int) {
         pieces[index] = PieceType.empty
-
         _isFormed = false
     }
 

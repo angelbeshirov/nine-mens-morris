@@ -1,19 +1,15 @@
-import Foundation
-
 enum IOError: Error {
-    case FailedToGetInitialColors
-    case FailedToGetCoordinates
+    case failedToGetInitialColors
+    case failedToGetCoordinates
 }
 
-enum InputError: Error { // can be changed to board error
-    case InvalidPieceID
-    case InvalidAssignPieceID
-    case InvalidMovePieceID
-    case InvalidRemovePieceID
-    case InvalidRemovePieceID_freePieces // sth else?
-    case InvalidMovePieceIDs_notAdjacent
+enum BoardError: Error { // can be changed to board error
+    case indexOutOfRange
+    case failedToAssignPiece(description: String)
+    case failedToRemovePiece(description: String)
+    case failedToMovePiece(description: String)
 }
 
-enum GameErorr: Error {
-    case InvalidGameState
+enum GameError: Error {
+    case gameIsNotOver
 }

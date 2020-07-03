@@ -56,8 +56,7 @@ struct BoardConstants {
     ]
     
     static let millIndices = [
-        // Horizontal mills
-        [0, 1, 2],
+        [0, 1, 2], // Horizontal mills
         [3, 4, 5],
         [6, 7, 8],
         [9, 10, 11],
@@ -79,7 +78,8 @@ struct BoardConstants {
 }
 
 struct GameConstants {
-    
+    static let boardSize = 24
+    static let screenSeparator = "------------------------------------------------------------"
 }
 
 struct ErrorMessages {

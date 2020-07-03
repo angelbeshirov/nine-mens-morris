@@ -10,20 +10,24 @@ public class GameManager {
 
     public func startConsoleGame() {
         self.ioHandler = ConsoleIOHandler()
-        guard let ioHandlerInitialized = self.ioHandler else {
+        guard let initializedIOHandler = self.ioHandler else {
             print("Error while initializing input/output service")
             return
         }
 
         do {
-            try game = ConsoleGame(ioHandler: ioHandlerInitialized) // TODO change to interface
+            try game = ConsoleGame(ioHandler: initializedIOHandler) // TODO change to interface
             try game!.startPlacingPhase()
             try game!.startMovingPhase()
             try game!.startFlyingPhase()
-        } catch {
+            try game!.handleGameOver()
+        } catch let error as IOError {
+            print("IO error: \(error)")
+        } catch GameError.gameIsNotOver {
             // change this to be handled by ErrorHandler
-            // add better error handling
-            print("Critical error encountered: \(error)")
+            print("Internal error: Game is not in game over state!")
+        } catch {
+            print("Unknown fatal error. \(error)")
         }
     }
 }
