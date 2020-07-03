@@ -13,3 +13,7 @@ enum InputError: Error { // can be changed to board error
     case InvalidRemovePieceID_freePieces // sth else?
     case InvalidMovePieceIDs_notAdjacent
 }
+
+enum GameErorr: Error {
+    case InvalidGameState
+}

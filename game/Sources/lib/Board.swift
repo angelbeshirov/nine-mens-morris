@@ -12,7 +12,7 @@ public class Board {
         self.mills = [Mill]()
 
         for (id, element) in BoardConstants.millIndices.enumerated() {
-            mills.append(Mill(id: id, ids: element))
+            mills.append(Mill(indices: element))
         }
     }
 
@@ -25,7 +25,7 @@ public class Board {
             throw InputError.InvalidAssignPieceID
         }
 
-        let millsForIndex = mills.filter { (mill) in mill.hasIdAndEmpty(id: index) }
+        let millsForIndex = mills.filter { (mill) in mill.hasIndexAndEmpty(index: index) }
         let millsFormed = millsForIndex.map{ $0.isFormed }
 
         pieces[index] = color.pieceType
@@ -36,26 +36,26 @@ public class Board {
         return millsFormed != millsFormedAfterAssignment
     }
 
-    public func remove(index: Int, opponentPieceType: PieceType) throws {
+    public func remove(index: Int, pieceType: PieceType) throws {
         guard BoardConstants.range.contains(index) else {
             throw InputError.InvalidPieceID
         }
 
-        guard pieces[index] != PieceType.empty && pieces[index] == opponentPieceType else {
+        guard pieces[index] != PieceType.empty && pieces[index] == pieceType else {
             throw InputError.InvalidRemovePieceID
         }
         
-        let partOfCompetedMill = mills.filter { (mill) in mill.hasId(id: index) && mill.isFormed }.count > 0
+        let partOfCompetedMill = mills.filter { (mill) in mill.hasIndex(index: index) && mill.isFormed }.count > 0
 
         if partOfCompetedMill {
             let opponenetIndices: [Int] = pieces.enumerated()
-                .filter { (idx, type) in type == opponentPieceType }
+                .filter { (idx, type) in type == pieceType }
                 .map { (idx, type) in return idx }
 
             var allAreMills: Bool = true
             
             for idx in opponenetIndices {
-                if (mills.filter { (mill) in mill.hasId(id: idx) && mill.isFormed }.count == 0) {
+                if (mills.filter { (mill) in mill.hasIndex(index: idx) && mill.isFormed }.count == 0) {
                     allAreMills = false
                     break
                 }
@@ -72,20 +72,29 @@ public class Board {
     // TODO add the check for mill
     // TODO add the adjacent check
     // check if next is occupied
-    public func move(from: Int, to: Int) throws -> Bool {
+    public func move(from: Int, to: Int, fromPieceType: PieceType, adjacentOnly: Bool) throws -> Bool {
         guard BoardConstants.range.contains(from) && BoardConstants.range.contains(to) else {
             throw InputError.InvalidPieceID
         }
 
-        guard pieces[from] != PieceType.empty && pieces[to] == PieceType.empty else {
+        guard pieces[from] != PieceType.empty && 
+              pieces[from] == fromPieceType && 
+              pieces[to] == PieceType.empty else {
             throw InputError.InvalidMovePieceID
         }
 
-        guard isAdjacent(element: from, adjacentTo: to) else {
+        // This guard is logical implication adjOnly->isAdjecent
+        // meaning if adjOnly is true then isAdjacent must also be true. Table is below
+        // adjOnly isAdjecent
+        // true true -> true
+        // true false -> false
+        // false true -> true
+        // false false -> true
+        guard !adjacentOnly || isAdjacent(element: from, adjacentTo: to) else {
             throw InputError.InvalidMovePieceIDs_notAdjacent
         }
 
-        let millsForIndex = mills.filter { (mill) in mill.hasIdAndEmpty(id: to) } // why empty?
+        let millsForIndex = mills.filter { (mill) in mill.hasIndexAndEmpty(index: to) } // why empty?
         let millsFormed = millsForIndex.map{ $0.isFormed }
 
         pieces[to] = pieces[from]
@@ -125,7 +134,7 @@ public class Board {
 
     private func doRemove(index: Int) throws {
         pieces[index] = PieceType.empty
-        let millsForIndex = mills.filter { (mill) in mill.hasId(id: index) }
+        let millsForIndex = mills.filter { (mill) in mill.hasIndex(index: index) }
         try millsForIndex.forEach { (mill) in try mill.remove(index: index)}
     }
 

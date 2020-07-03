@@ -1,8 +1,4 @@
-public class IOUtil {
-
-    public init() {
- 
-    }
+public class ConsoleIOHandler {
 
     public func getPlayerColors() throws -> (PlayerColor, PlayerColor) {
         var player1Color: PlayerColor? = nil
@@ -22,7 +18,7 @@ public class IOUtil {
                 }
                 break
             } else {
-                print("Invalid choice, please enter either [black/white]")
+                print("Invalid input, please enter either [black/white]")
             }
         }
 
@@ -34,55 +30,53 @@ public class IOUtil {
     }
 
     public func getSingleCoordinates() throws -> (Int) {
-        var coordinate1d: Int? = nil;
+        var coordinates1d: Int? = nil;
         
-        //print("Please enter coordinate for piece placement [a-h][1-8]:")
-
         while let input = readLine() {
-            let coord2d = input.lowercased()
+            let coordinates2d = input.lowercased()
 
-            if let transformedCoordinate = BoardConstants.coordinateMapping[coord2d] {
-                coordinate1d = transformedCoordinate
+            if let transformedCoordinates = BoardConstants.coordinateMapping[coordinates2d] {
+                coordinates1d = transformedCoordinates
                 break
             } else {
-                print("The coordinate you have entered does not exist on this board, please try again");
+                print("The coordinates you have entered does not exist on this board, please try again");
             }
         }
 
-        guard let finalCoordinate = coordinate1d else {
+        guard let finalCoordinates = coordinates1d else {
             throw IOError.FailedToGetCoordinates
         }
 
-        return finalCoordinate
+        return finalCoordinates
     }
 
     public func getDoubleCoordinates() throws -> (Int, Int) {
-        var coordinate1dFirst: Int? = nil;
-        var coordinate1dSecond: Int? = nil;
+        var coordinates1dFirst: Int? = nil;
+        var coordinates1dSecond: Int? = nil;
 
         while let input = readLine() {
             guard input.count == 4 else {
-                print("The coordinate you have entered is invalid, please try again");
+                print("The coordinates you have entered are invalid, please try again");
                 continue
             }
 
-            let move2dCoord = input.lowercased()
+            let move2dCoordinates = input.lowercased()
 
-            if let transformedCoordinateFirst = BoardConstants.coordinateMapping[String(move2dCoord.prefix(2))],
-               let transformedCoordinateSecond = BoardConstants.coordinateMapping[String(move2dCoord.suffix(2))] {
-                coordinate1dFirst = transformedCoordinateFirst
-                coordinate1dSecond = transformedCoordinateSecond
+            if let transformedCoordinatesFirst = BoardConstants.coordinateMapping[String(move2dCoordinates.prefix(2))],
+               let transformedCoordinatesSecond = BoardConstants.coordinateMapping[String(move2dCoordinates.suffix(2))] {
+                coordinates1dFirst = transformedCoordinatesFirst
+                coordinates1dSecond = transformedCoordinatesSecond
                 break
             } else {
-                print("The coordinate you have entered is invalid, please try again");
+                print("The coordinates you have entered are invalid, please try again"); // change to some constant REPEATED??
             }
         }
 
-        guard let finalCoordinate1dFirst = coordinate1dFirst, 
-              let finalCoordinate1dSecond = coordinate1dSecond else {
+        guard let finalCoordinates1dFirst = coordinates1dFirst, 
+              let finalCoordinates1dSecond = coordinates1dSecond else {
             throw IOError.FailedToGetCoordinates
         }
 
-        return (finalCoordinate1dFirst, finalCoordinate1dSecond)
+        return (finalCoordinates1dFirst, finalCoordinates1dSecond)
     }
 }

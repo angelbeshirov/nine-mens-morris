@@ -1,39 +1,32 @@
 class Mill {
-    private var id: Int
-    private var pieces: [Int: PieceType] // id -> PieceType
-    private var ids: [Int]
-
+    private var pieces: [Int: PieceType] // pieceIndex -> PieceType
     private var _isFormed: Bool
 
-    // computed property to check whether the mill is complete or not
+    // computed property to check whether the mill is completed or not
     var isFormed: Bool {
         get {
             return _isFormed
         }
     }
 
-    public init(id: Int, ids: [Int]) {
-        self.id = id
-        self.ids = ids
+    public init(indices: [Int]) {
+        self.pieces = [Int: PieceType]() // mapping from id to piece type
         self._isFormed = false
-        // mapping from id to piece type
-        self.pieces = [Int: PieceType]()
-        for element in ids {
-            pieces[element] = PieceType.empty
+        for index in indices {
+            pieces[index] = PieceType.empty
         }
-        // print(pieces)
     }
 
-    func hasId(id: Int) -> Bool {
-        return pieces[id] != nil
+    func hasIndex(index: Int) -> Bool {
+        return pieces[index] != nil
     }
 
-    func hasIdAndEmpty(id: Int) -> Bool {
-        return pieces[id] == PieceType.empty
+    func hasIndexAndEmpty(index: Int) -> Bool {
+        return pieces[index] == PieceType.empty
     }
 
     func assign(index: Int, pieceType: PieceType) throws {
-        guard hasIdAndEmpty(id: index) else {
+        guard hasIndexAndEmpty(index: index) else {
             throw InputError.InvalidAssignPieceID
         }
 
@@ -42,9 +35,8 @@ class Mill {
         _isFormed = isMillFormed()
     }
 
-// CHANGE ID AND INDEX
     func remove(index: Int) throws {
-        guard hasId(id: index) && !hasIdAndEmpty(id: index) else {
+        guard hasIndex(index: index) && !hasIndexAndEmpty(index: index) else {
             throw InputError.InvalidRemovePieceID
         }
 

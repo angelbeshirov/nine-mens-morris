@@ -1,4 +1,4 @@
 import lib
 
-let gamePlayer = GamePlayer()
-gamePlayer.startConsoleGame()
+let gameManager = GameManager()
+gameManager.startConsoleGame()

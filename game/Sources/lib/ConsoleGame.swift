@@ -1,11 +1,10 @@
 public class ConsoleGame {
-
     private var player1: Player
     private var player2: Player
     private var board: Board
     
     private var playerToMove: PlayerType
-    private var ioUtil: IOUtil
+    private var ioHandler: ConsoleIOHandler
 
     var nextPlayer: PlayerType {
         get {
@@ -18,18 +17,26 @@ public class ConsoleGame {
     }
 
     var gameState: GameState {
-
-        if player1.hasPieces || player2.hasPieces {
-            return GameState.placingPieces
-        } else if player1.placedPieces > 3 && player2.placedPieces > 3 {
-            return GameState.movingPieces
-        } else if player1.placedPieces == 3 || player2.placedPieces == 3 {
-            return GameState.flyingPieces
-        } else if player1.placedPieces < 3 || player2.placedPieces < 3 {
-            return GameState.gameOver
+        get {
+            // all pieces have been place when this is false
+            if player1.hasPiecesToPlace || player2.hasPiecesToPlace { 
+                return GameState.placingPieces
+            } else if player1.placedPieces > 3 && player2.placedPieces > 3 {
+                return GameState.movingPieces
+            } else if player1.placedPieces == 3 || player2.placedPieces == 3 {
+                return GameState.flyingPieces
+            } else {
+                return GameState.gameOver
+            }
         }
+    }
 
-        return GameState.undefined
+    private var currentPlayerObject: Player {
+        return getPlayerObject(playerType: playerToMove)
+    }
+
+    private var nextPlayerObject: Player {
+        return getPlayerObject(playerType: nextPlayer)
     }
 
     // var ioUtil: IOUtil { // TODO add interface
@@ -41,9 +48,9 @@ public class ConsoleGame {
     //     }
     // }
 
-    public init(ioUtil: IOUtil) throws {
-        self.ioUtil = ioUtil
-        let colors: (PlayerColor, PlayerColor) = try ioUtil.getPlayerColors()
+    public init(ioHandler: ConsoleIOHandler) throws {
+        self.ioHandler = ioHandler
+        let colors: (PlayerColor, PlayerColor) = try ioHandler.getPlayerColors()
 
         board = Board(_size: 24)
         player1 = Player(color: colors.0, board: board)
@@ -60,17 +67,11 @@ public class ConsoleGame {
         while gameState == GameState.placingPieces || hasToRemove {
             if !hasToRemove {
                 print("\(playerToMove.rawValue) please enter coordinates to place a piece:")
-                let coordinates = try ioUtil.getSingleCoordinates()
+                let coordinates = try ioHandler.getSingleCoordinates()
 
                 do {
-                    if playerToMove == PlayerType.player1 {
-                        hasToRemove = try player1.assign(index: coordinates)
-                        print("\(playerToMove.rawValue), you have \(player1.piecesToPlace) pieces left")
-                    } else {
-                        hasToRemove = try player2.assign(index: coordinates)
-                        print("\(playerToMove.rawValue), you have \(player2.piecesToPlace) pieces left")
-                    }
-
+                    hasToRemove = try currentPlayerObject.assign(index: coordinates)
+                    print("\(playerToMove.rawValue), you have \(currentPlayerObject.piecesToPlace) pieces left to place")
                     board.visualize()
                 } catch {
                     print("The coordinates you have entered are invalid: \(error)")
@@ -81,18 +82,12 @@ public class ConsoleGame {
 
             if hasToRemove {
                 print("\(playerToMove.rawValue) you have formed a mill, please enter coordinates to remove one of your opponent's pieces:")
-                let coordinates = try ioUtil.getSingleCoordinates()
+                let coordinates = try ioHandler.getSingleCoordinates()
 
                 do {
-                    if playerToMove == PlayerType.player1 {
-                        try player1.removePiece(index: coordinates) 
-                        // if you try to remove a piece from a mill and there are other pieces available throw exception
-                    } else {
-                        try player2.removePiece(index: coordinates)
-                    }
-
-                    // visualization as this is an extra move
-                    board.visualize()
+                    try nextPlayerObject.removePiece(index: coordinates)
+                    board.visualize() // visualization as this is an extra move
+                    print("\(nextPlayer.rawValue) you have \(nextPlayerObject.placedPieces) placed pieces left")
                 } catch {
                     // Change to more specific error handling
                     print("The coordinates you have entered are invalid: \(error)")
@@ -105,44 +100,19 @@ public class ConsoleGame {
 
             playerToMove = nextPlayer
         }
-
-        // try player1.assign(index: 0)
-        // try player1.assign(index: 2)
-        // try player1.assign(index: 4)
-        // try player1.assign(index: 6)
-        // try player1.assign(index: 8)
-        // try player1.assign(index: 11)
-        // try player1.assign(index: 13)
-        // try player1.assign(index: 14)
-        // try player1.assign(index: 15)
-
-        // try player2.assign(index: 1)
-        // try player2.assign(index: 3)
-        // try player2.assign(index: 5)
-        // try player2.assign(index: 7)
-        // try player2.assign(index: 9)
-        // try player2.assign(index: 10)
-        // try player2.assign(index: 12)
-        // try player2.assign(index: 17)
-        // try player2.assign(index: 22)
-        // board.visualize()
     }
 
     public func startMovingPhase() throws {
         var hasToRemove: Bool = false
         print("All pieces have been placed, starting phase 2 - moving pieces")
+
         while gameState == GameState.movingPieces || hasToRemove {
             if !hasToRemove {
                 print("\(playerToMove.rawValue) please enter coordinates to move a piece:")
-                let coordinates: (Int, Int) = try ioUtil.getDoubleCoordinates()
+                let coordinates: (Int, Int) = try ioHandler.getDoubleCoordinates()
 
                 do {
-                    if playerToMove == PlayerType.player1 {
-                        hasToRemove = try player1.movePiece(index1: coordinates.0, index2: coordinates.1)
-                    } else {
-                        hasToRemove = try player2.movePiece(index1: coordinates.0, index2: coordinates.1)
-                    }
-
+                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, index2: coordinates.1)
                     board.visualize()
                 } catch {
                     print("The coordinates you have entered are invalid: \(error)")
@@ -153,17 +123,12 @@ public class ConsoleGame {
 
             if hasToRemove {
                 print("\(playerToMove.rawValue) you have formed a mill, please enter coordinates to remove one of your opponent's pieces:")
-                let coordinates = try ioUtil.getSingleCoordinates()
+                let coordinates = try ioHandler.getSingleCoordinates()
 
                 do {
-                    if playerToMove == PlayerType.player1 {
-                        try player1.removePiece(index: coordinates) 
-                    } else {
-                        try player2.removePiece(index: coordinates)
-                    }
-
-                    // visualization as this is an extra move
-                    board.visualize()
+                    try nextPlayerObject.removePiece(index: coordinates)
+                    board.visualize() // visualization as this is an extra move
+                    print("\(nextPlayer.rawValue) you have \(nextPlayerObject.placedPieces) placed pieces left")
                 } catch {
                     // Change to more specific error handling
                     print("The coordinates you have entered are invalid: \(error)")
@@ -179,53 +144,51 @@ public class ConsoleGame {
     }
 
     public func startFlyingPhase() throws {
-        print("One of the players is left with 3 pieces, starting phase 3 - flying")
+        let playerLeftWith3Pieces = currentPlayerObject.placedPieces == 3 ? playerToMove : nextPlayer
+        print("\(playerLeftWith3Pieces.rawValue) you have 3 pieces left, starting phase 3 - flying")
         var hasToRemove: Bool = false;
-        while gameState == GameState.flyingPieces {
-            print("\(playerToMove.rawValue) please enter coordinates to move a piece:")
-            let coordinates: (Int, Int) = try ioUtil.getDoubleCoordinates()
 
-            do {
-                if playerToMove == PlayerType.player1 {
-                    hasToRemove = try player1.movePiece(index1: coordinates.0, index2: coordinates.1)
-                } else {
-                    hasToRemove = try player2.movePiece(index1: coordinates.0, index2: coordinates.1)
+        while gameState == GameState.flyingPieces || hasToRemove {
+            if !hasToRemove {
+                print("\(playerToMove.rawValue) please enter coordinates to move a piece:")
+                let coordinates: (Int, Int) = try ioHandler.getDoubleCoordinates()
+                let adjacent: Bool = playerLeftWith3Pieces != playerToMove // is this okay to compare enums?
+
+                do {
+                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, 
+                                                                    index2: coordinates.1, 
+                                                                    adjacentOnly: adjacent)
+                    board.visualize()
+                } catch {
+                    print("The coordinates you have entered are invalid: \(error)")
+                    print("Please try again")
+                    continue
                 }
-            } catch {
-                print("The coordinates you have entered are invalid: \(error)")
-                print("Please try again")
-                continue
+            }
+
+            if hasToRemove {
+                print("\(playerToMove.rawValue) you have formed a mill, please enter coordinates to remove one of your opponent's pieces:")
+                let coordinates = try ioHandler.getSingleCoordinates()
+
+                do {
+                    try nextPlayerObject.removePiece(index: coordinates)
+                    board.visualize() // visualization as this is an extra move
+                    print("\(nextPlayer.rawValue) you have \(nextPlayerObject.placedPieces) placed pieces left")
+                } catch {
+                    // Change to more specific error handling
+                    print("The coordinates you have entered are invalid: \(error)")
+                    print("Please try again")
+                    continue
+                }
+
+                hasToRemove = false
             }
 
             playerToMove = nextPlayer
-            board.visualize()
         }
     }
 
-    // public func start() {
-    //     // let ioUtil: IOUtil = IOUtil()
-    //     let colors: (Color, Color) = ioUtil.getPlayerColors()
-
-    //     var player1Turn = true
-
-    //     board.visualize()
-
-    //     // phase 2 (adjacent positions only)
-
-    //     while player1.getPlacedPieces() > 2 && player2.getPlacedPieces() > 2 {
-    //         if player1Turn {
-    //             print("Player 1 please enter coordinates to move a piece")
-    //             let coordinates: (Int, Int) = ioUtil.getDoubleCoordinates()
-    //             player1.movePiece(index1: coordinates.0, index2: coordinates.1)
-    //             player1Turn = false
-    //         } else {
-    //             print("Player 2 please enter coordinates to move a piece:")
-    //             let coordinates: (Int, Int) = ioUtil.getDoubleCoordinates()
-    //             player2.movePiece(index1: coordinates.0, index2: coordinates.1)
-    //             player1Turn = true
-    //         }
-
-    //         board.visualize()
-    //     }
-    // }
+    private func getPlayerObject(playerType: PlayerType) -> Player {
+        return playerType == PlayerType.player1 ? player1 : player2
+    }
 }
