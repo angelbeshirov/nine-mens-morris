@@ -1,4 +1,4 @@
-enum IOError: Error {
+enum InputError: Error {
     case failedToGetInitialColors
     case failedToGetCoordinates
 }

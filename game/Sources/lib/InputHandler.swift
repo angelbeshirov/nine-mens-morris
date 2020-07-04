@@ -1,10 +1,17 @@
-public class ConsoleIOHandler {
+public protocol InputHandler {
+    func getPlayerColors() throws -> (PlayerColor, PlayerColor)
+    func getSingleCoordinates() throws -> (Int)
+    func getDoubleCoordinates() throws -> (Int, Int)
+}
+
+// This is a concrete implementation of the InputHandler i.e. ConsoleInputHandler, print is okay
+public class ConsoleInputHandler: InputHandler {
 
     public func getPlayerColors() throws -> (PlayerColor, PlayerColor) {
         var player1Color: PlayerColor? = nil
         var player2Color: PlayerColor? = nil
 
-        print("Please enter the color of the pools for player 1 [black/white]:")
+        print(ConsoleMessages.enterColorsPrompt)
         while let input = readLine() {
             let choice = input.lowercased()
             
@@ -18,12 +25,12 @@ public class ConsoleIOHandler {
                 }
                 break
             } else {
-                print("Invalid input, please enter either [black/white]")
+                print(ConsoleMessages.invalidColors)
             }
         }
 
         guard let player1FinalColor = player1Color, let player2FinalColor = player2Color else {
-            throw IOError.failedToGetInitialColors
+            throw InputError.failedToGetInitialColors
         }
 
         return (player1FinalColor, player2FinalColor)
@@ -35,16 +42,16 @@ public class ConsoleIOHandler {
         while let input = readLine() {
             let coordinates2d = input.lowercased()
 
-            if let transformedCoordinates = BoardConstants.coordinateMapping[coordinates2d] {
+            if let transformedCoordinates = Board.Constants.coordinateMapping[coordinates2d] {
                 coordinates1d = transformedCoordinates
                 break
             } else {
-                print("The coordinates you have entered does not exist on this board, please try again");
+                print(ConsoleMessages.invalidCoordinates);
             }
         }
 
         guard let finalCoordinates = coordinates1d else {
-            throw IOError.failedToGetCoordinates
+            throw InputError.failedToGetCoordinates
         }
 
         return finalCoordinates
@@ -56,25 +63,25 @@ public class ConsoleIOHandler {
 
         while let input = readLine() {
             guard input.count == 4 else {
-                print("The coordinates you have entered are invalid, please try again");
+                print(ConsoleMessages.invalidCoordinates);
                 continue
             }
 
             let move2dCoordinates = input.lowercased()
 
-            if let transformedCoordinatesFirst = BoardConstants.coordinateMapping[String(move2dCoordinates.prefix(2))],
-               let transformedCoordinatesSecond = BoardConstants.coordinateMapping[String(move2dCoordinates.suffix(2))] {
+            if let transformedCoordinatesFirst = Board.Constants.coordinateMapping[String(move2dCoordinates.prefix(2))],
+               let transformedCoordinatesSecond = Board.Constants.coordinateMapping[String(move2dCoordinates.suffix(2))] {
                 coordinates1dFirst = transformedCoordinatesFirst
                 coordinates1dSecond = transformedCoordinatesSecond
                 break
             } else {
-                print("The coordinates you have entered are invalid, please try again"); // change to some constant REPEATED??
+                print(ConsoleMessages.invalidCoordinates);
             }
         }
 
         guard let finalCoordinates1dFirst = coordinates1dFirst, 
               let finalCoordinates1dSecond = coordinates1dSecond else {
-            throw IOError.failedToGetCoordinates
+            throw InputError.failedToGetCoordinates
         }
 
         return (finalCoordinates1dFirst, finalCoordinates1dSecond)

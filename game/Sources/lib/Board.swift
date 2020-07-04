@@ -1,26 +1,30 @@
 public class Board {
 
-    var size: Int
-    var pieces: [PieceType]
-    var mills: [Mill]
+    private var size: Int
+    private var outputHandler: OutputHandler
+    private var pieces: [PieceType]
+    private var mills: [Mill]
 
-    public init(_size: Int) {
+    public init(_size: Int, outputHandler: OutputHandler) {
         self.size = _size
+        self.outputHandler = outputHandler
         self.pieces = Array(repeating: PieceType.empty, count: _size)
         self.mills = [Mill]()
 
-        for element in BoardConstants.millIndices {
+        for element in Constants.millIndices {
             mills.append(Mill(indices: element))
         }
     }
+}
 
+extension Board {
     public func assign(index: Int, color: PlayerColor) throws -> Bool {
-        guard BoardConstants.range.contains(index) else {
+        guard Constants.range.contains(index) else {
             throw BoardError.indexOutOfRange
         }
 
         guard pieces[index] == PieceType.empty else {
-            throw BoardError.failedToAssignPiece(description: "The piece you are trying to assign is already assigned.")
+            throw BoardError.failedToAssignPiece(description: Constants.alreadyAssigned)
         }
 
         let millsForIndex = mills.filter { (mill) in mill.hasIndexAndEmpty(index: index) }
@@ -33,18 +37,20 @@ public class Board {
 
         return millsFormed != millsFormedAfterAssignment
     }
+}
 
+extension Board {
     public func remove(index: Int, pieceType: PieceType) throws {
-        guard BoardConstants.range.contains(index) else {
+        guard Constants.range.contains(index) else {
             throw BoardError.indexOutOfRange
         }
 
         guard pieces[index] != PieceType.empty else {
-            throw BoardError.failedToRemovePiece(description: "The piece you are trying to remove is empty.")
+            throw BoardError.failedToRemovePiece(description: Constants.tryingToRemoveEmpty)
         }
 
         guard pieces[index] == pieceType else {
-            throw BoardError.failedToRemovePiece(description: "The piece you are trying to remove is not assigned by you.")
+            throw BoardError.failedToRemovePiece(description: Constants.tryingToRemoveAssignedByMe)
         }
 
         let partOfCompetedMill = mills.filter { (mill) in mill.hasIndex(index: index) && mill.isFormed }.count > 0
@@ -65,29 +71,30 @@ public class Board {
             }
 
             if !allAreMills {
-                throw BoardError.failedToRemovePiece(description: 
-                "The piece you are trying to remove is part of a mill, while there are free pieces which are not part of any mills.")
+                throw BoardError.failedToRemovePiece(description: Constants.tryingToRemoveFromMillWhenAvailable)
             }
         }
 
         doRemove(index: index)
     }
+}
 
+extension Board {
     public func move(from: Int, to: Int, fromPieceType: PieceType, adjacentOnly: Bool) throws -> Bool {
-        guard BoardConstants.range.contains(from) && BoardConstants.range.contains(to) else {
+        guard Constants.range.contains(from) && Constants.range.contains(to) else {
             throw BoardError.indexOutOfRange
         }
 
         guard pieces[from] != PieceType.empty else {
-            throw BoardError.failedToMovePiece(description: "The piece you are trying to move is empty.")
+            throw BoardError.failedToMovePiece(description: Constants.tryingToMoveEmpty)
         }
 
         guard pieces[from] == fromPieceType else {
-            throw BoardError.failedToMovePiece(description: "The piece you are trying to move is not assigned by you.")
+            throw BoardError.failedToMovePiece(description: Constants.tryingToMoveNotAssignedByMe)
         }
 
         guard pieces[to] == PieceType.empty else {
-            throw BoardError.failedToMovePiece(description: "You are trying to move a piece to an already assigned index.")
+            throw BoardError.failedToMovePiece(description: Constants.tryingToMoveToNotEmpty)
         }
 
         // This guard is logical implication adjOnly->isAdjecent
@@ -99,8 +106,7 @@ public class Board {
         // false false -> true
         guard !adjacentOnly || isAdjacent(element: from, adjacentTo: to) else {
             // the index is not adjacent to the initial index (for phase 2 and phase 3 for the player with more than 3 pieces)
-            throw BoardError.failedToMovePiece(
-                description: "You are trying to move a piece to a non-adjacent index while you have more than 3 pieces left.")
+            throw BoardError.failedToMovePiece(description: Constants.tryingToMoveToNonAdjacent)
         }
 
         let millsForIndex = mills.filter { (mill) in mill.hasIndexAndEmpty(index: to) } // repeated
@@ -114,25 +120,32 @@ public class Board {
 
         return millsFormed != millsFormedAfterAssignment
     }
+}
 
+extension Board {
     public func visualize() {
-        print("    A   B   C   D   E   F   G")
-        print("1   \(pieces[0].rawValue)-----------\(pieces[1].rawValue)-----------\(pieces[2].rawValue)")
-        print("    |           |           |")
-        print("2   |   \(pieces[3].rawValue)-------\(pieces[4].rawValue)-------\(pieces[5].rawValue)   |")
-        print("    |   |       |       |   |")
-        print("3   |   |   \(pieces[6].rawValue)---\(pieces[7].rawValue)---\(pieces[8].rawValue)   |   |")
-        print("    |   |   |       |   |   |")
-        print("4   \(pieces[9].rawValue)---\(pieces[10].rawValue)---\(pieces[11].rawValue)    ", terminator: "")
-        print("   \(pieces[12].rawValue)---\(pieces[13].rawValue)---\(pieces[14].rawValue)")
-        print("    |   |   |       |   |   |")
-        print("5   |   |   \(pieces[15].rawValue)---\(pieces[16].rawValue)---\(pieces[17].rawValue)   |   |")
-        print("    |   |       |       |   |")
-        print("6   |   \(pieces[18].rawValue)-------\(pieces[19].rawValue)-------\(pieces[20].rawValue)   |")
-        print("    |           |           |")
-        print("7   \(pieces[21].rawValue)-----------\(pieces[22].rawValue)-----------\(pieces[23].rawValue)")
-    }
+        let boardTextVisualization = 
+        "    A   B   C   D   E   F   G\n" +
+        "1   \(pieces[0].rawValue)-----------\(pieces[1].rawValue)-----------\(pieces[2].rawValue)\n" + 
+        "    |           |           |\n" +
+        "2   |   \(pieces[3].rawValue)-------\(pieces[4].rawValue)-------\(pieces[5].rawValue)   |\n" +
+        "    |   |       |       |   |\n" +
+        "3   |   |   \(pieces[6].rawValue)---\(pieces[7].rawValue)---\(pieces[8].rawValue)   |   |\n" +
+        "    |   |   |       |   |   |\n" +
+        "4   \(pieces[9].rawValue)---\(pieces[10].rawValue)---\(pieces[11].rawValue)    " +
+        "   \(pieces[12].rawValue)---\(pieces[13].rawValue)---\(pieces[14].rawValue)\n" + 
+        "    |   |   |       |   |   |\n" +
+        "5   |   |   \(pieces[15].rawValue)---\(pieces[16].rawValue)---\(pieces[17].rawValue)   |   |\n" + 
+        "    |   |       |       |   |\n" +
+        "6   |   \(pieces[18].rawValue)-------\(pieces[19].rawValue)-------\(pieces[20].rawValue)   |\n" +
+        "    |           |           |\n" + 
+        "7   \(pieces[21].rawValue)-----------\(pieces[22].rawValue)-----------\(pieces[23].rawValue)\n"
 
+        outputHandler.display(output: boardTextVisualization)
+    }
+}
+
+extension Board {
     private func doRemove(index: Int) {
         pieces[index] = PieceType.empty
         let millsForIndex = mills.filter { (mill) in mill.hasIndexAndNotEmpty(index: index) }
@@ -140,7 +153,7 @@ public class Board {
     }
 
     private func isAdjacent(element index1: Int, adjacentTo index2: Int) -> Bool {
-        return index1 < BoardConstants.nodeNeighbours.count && 
-               BoardConstants.nodeNeighbours[index1].contains(index2)
+        return index1 < Constants.nodeNeighbours.count && 
+               Constants.nodeNeighbours[index1].contains(index2)
     }
 }

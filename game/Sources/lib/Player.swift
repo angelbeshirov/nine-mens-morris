@@ -4,6 +4,16 @@ public class Player {
     private var _placedPieces: Int
     private var _piecesToPlace: Int
 
+    public init(color: PlayerColor, board: Board) {
+        self.color = color
+        self.board = board
+        self._placedPieces = 0
+        self._piecesToPlace = 9
+    }
+}
+
+// computable properties
+extension Player {
     var hasPiecesToPlace: Bool {
         get {
             return _piecesToPlace > 0
@@ -21,14 +31,10 @@ public class Player {
             return _piecesToPlace
         }
     }
+}
 
-    public init(color: PlayerColor, board: Board) {
-        self.color = color
-        self.board = board
-        self._placedPieces = 0
-        self._piecesToPlace = 9
-    }
-
+// conforming to player interface
+extension Player {
     public func assign(index: Int) throws -> Bool {
         let formedMill: Bool = try board.assign(index: index, color: self.color)
         self._placedPieces += 1
