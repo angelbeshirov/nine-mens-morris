@@ -1,7 +1,7 @@
 import XCTest
 
-import gameTests
+import GameTests
 
 var tests = [XCTestCaseEntry]()
-tests += gameTests.allTests()
+tests += GameTests.allTests()
 XCTMain(tests)

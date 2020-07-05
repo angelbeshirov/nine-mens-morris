@@ -1,3 +1,8 @@
+import IOModule
+
+// The class used for starting different game versions and
+// using different i/o handlers if neccessary. This can be done
+// by implementing the specific protocols (Game, InputHandler and OutputHandler).
 public class GameManager {
 
     private var game: Game?
@@ -12,20 +17,25 @@ public class GameManager {
 }
 
 extension GameManager {
+
+    // Starts the console version of the game by initializing the i/o handlers
+    // and starting the game phases.
     public func startConsoleGame() {
-        self.inputHandler = ConsoleInputHandler()
         self.outputHandler = ConsoleOutputHandler()
 
-        // The IO handlers here are not yet initialized so we use the primitive print
-        // which in this case is the same as the one in the implementation for the console 
-        // version, but in general it can be different and this will make it easier to generalize.
-        guard let consoleInputHandler = self.inputHandler else {
-            print("Failed to initialize input handler.")
+        // The i/o handlers here are not yet initialized so we use the primitive 
+        // print which in this case is the same as the one in the implementation 
+        // of the console version, but in general it can be different and this 
+        // will make it easier to generalize.
+        guard let consoleOutputHandler = self.outputHandler else {
+            print("Failed to initialize output handler.")
             return
         }
 
-        guard let consoleOutputHandler = self.outputHandler else {
-            print("Failed to initialize output handler.")
+        self.inputHandler = ConsoleInputHandler(outputHandler: consoleOutputHandler)
+
+        guard let consoleInputHandler = self.inputHandler else {
+            print("Failed to initialize input handler.")
             return
         }
 
@@ -38,9 +48,9 @@ extension GameManager {
         } catch let inputError as InputError {
             consoleOutputHandler.display(output: "Input error: \(inputError)")
         } catch GameError.gameIsNotOver {
-            // change this to be handled by ErrorHandler
             consoleOutputHandler.display(output: "Internal error: Game is not in game over state!")
         } catch {
+            // handle all unknown errors
             consoleOutputHandler.display(output: "Unknown fatal error: \(error)")
         }
     }
