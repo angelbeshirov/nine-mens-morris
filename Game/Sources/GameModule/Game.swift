@@ -135,15 +135,15 @@ extension ConsoleGame {
             } catch BoardError.indexOutOfRange {
                     // this shouldn't happen if the ConsoleInputHandler implementation of the 
                     // InputHandler is used, but can happen with another one
-                    outputHandler.display(output: Constants.invalidCoordinates)
-                    outputHandler.display(output: Constants.tryAgain)
+                    outputHandler.displayError(error: Constants.invalidCoordinates)
+                    outputHandler.displayError(error: Constants.tryAgain)
             // no multi-pattern matching supported, this is why we have 2 catches which share the same code
             } catch BoardError.failedToAssignPiece(let description) {
-                    outputHandler.display(output: description)
-                    outputHandler.display(output: Constants.tryAgain)
+                    outputHandler.displayError(error: description)
+                    outputHandler.displayError(error: Constants.tryAgain)
             } catch BoardError.failedToRemovePiece(let description) {
-                    outputHandler.display(output: description)
-                    outputHandler.display(output: Constants.tryAgain)
+                    outputHandler.displayError(error: description)
+                    outputHandler.displayError(error: Constants.tryAgain)
             }
         }
 
@@ -188,14 +188,14 @@ extension ConsoleGame {
 
                 currentPlayer = nextPlayer
             } catch BoardError.indexOutOfRange {
-                    outputHandler.display(output: Constants.invalidCoordinates)
-                    outputHandler.display(output: Constants.tryAgain)
+                    outputHandler.displayError(error: Constants.invalidCoordinates)
+                    outputHandler.displayError(error: Constants.tryAgain)
             } catch BoardError.failedToMovePiece(let description) {
-                    outputHandler.display(output: description)
-                    outputHandler.display(output: Constants.tryAgain)
+                    outputHandler.displayError(error: description)
+                    outputHandler.displayError(error: Constants.tryAgain)
             } catch BoardError.failedToRemovePiece(let description) {
-                    outputHandler.display(output: description)
-                    outputHandler.display(output: Constants.tryAgain)
+                    outputHandler.displayError(error: description)
+                    outputHandler.displayError(error: Constants.tryAgain)
             }
         }
 
@@ -246,14 +246,14 @@ extension ConsoleGame {
 
                 currentPlayer = nextPlayer
             } catch BoardError.indexOutOfRange {
-                outputHandler.display(output: Constants.invalidCoordinates)
-                outputHandler.display(output: Constants.tryAgain)
+                outputHandler.displayError(error: Constants.invalidCoordinates)
+                outputHandler.displayError(error: Constants.tryAgain)
             } catch BoardError.failedToMovePiece(let description) {
-                outputHandler.display(output: description)
-                outputHandler.display(output: Constants.tryAgain)
+                outputHandler.displayError(error: description)
+                outputHandler.displayError(error: Constants.tryAgain)
             } catch BoardError.failedToRemovePiece(let description) {
-                outputHandler.display(output: description)
-                outputHandler.display(output: Constants.tryAgain)
+                outputHandler.displayError(error: description)
+                outputHandler.displayError(error: Constants.tryAgain)
             }
         }
 

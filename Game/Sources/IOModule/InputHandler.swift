@@ -52,7 +52,7 @@ extension ConsoleInputHandler {
                 break
             } else {
                 // invalid input by unknown rawValue (invalid color)
-                outputHandler.display(output: Constants.invalidColors)
+                outputHandler.displayError(error: Constants.invalidColors)
             }
         }
 
@@ -83,7 +83,7 @@ extension ConsoleInputHandler {
                 break
             } else {
                 // the input doesn't have a mapping in the coordinateMapping dict
-                outputHandler.display(output: Constants.invalidCoordinates)
+                outputHandler.displayError(error: Constants.invalidCoordinates)
             }
         }
 
@@ -108,7 +108,7 @@ extension ConsoleInputHandler {
 
         while let input = readLine() {
             guard input.count == 4 else {
-                outputHandler.display(output: Constants.invalidDoubleCoordinates);
+                outputHandler.displayError(error: Constants.invalidDoubleCoordinates);
                 continue
             }
 
@@ -122,7 +122,7 @@ extension ConsoleInputHandler {
             } else {
                 // one of the two coordinates from the input doesn't have 
                 // a mapping in the coordinateMapping dict
-                outputHandler.display(output: Constants.invalidCoordinates);
+                outputHandler.displayError(error: Constants.invalidCoordinates);
             }
         }
 

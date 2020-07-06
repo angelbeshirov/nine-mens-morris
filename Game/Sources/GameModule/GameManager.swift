@@ -21,7 +21,7 @@ extension GameManager {
     // Starts the console version of the game by initializing the i/o handlers
     // and starting the game phases.
     public func startConsoleGame() {
-        self.outputHandler = ConsoleOutputHandler()
+        self.outputHandler = ConsoleOutputAndErrorHandler()
 
         // The i/o handlers here are not yet initialized so we use the primitive 
         // print which in this case is the same as the one in the implementation 
@@ -46,12 +46,12 @@ extension GameManager {
             try game!.startFlyingPhase()
             try game!.handleGameOverPhase()
         } catch let inputError as InputError {
-            consoleOutputHandler.display(output: "Input error: \(inputError)")
+            consoleOutputHandler.displayError(error: "Input error: \(inputError)")
         } catch GameError.gameIsNotOver {
-            consoleOutputHandler.display(output: "Internal error: Game is not in game over state!")
+            consoleOutputHandler.displayError(error: "Internal error: Game is not in game over state!")
         } catch {
             // handle all unknown errors
-            consoleOutputHandler.display(output: "Unknown fatal error: \(error)")
+            consoleOutputHandler.displayError(error: "Unknown fatal error: \(error)")
         }
     }
 }
