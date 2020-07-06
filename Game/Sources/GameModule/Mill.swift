@@ -40,7 +40,7 @@ extension Mill {
     }
 }
 
-// Predicate boolean functions for index validations before any operations are done.
+// Predicate boolean functions for index validations before any operations are being made.
 // The board class is responsible to ensuring the correctness of the Mill class state
 // as it contains all the pieces.
 extension Mill {

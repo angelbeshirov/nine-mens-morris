@@ -1,10 +1,10 @@
 import IOModule
 
 // The player protocol which every player object should implement used in some game implementation.
-// By abstracting this class behind a protocol, we allow different type of users to be created and
+// By abstracting this class with a protocol, we allow different type of users to be created and
 // used in the game implementation. One example can be 2 game modes:
 // 1. human player vs human player
-// 2. human player vs AI
+// 2. human player vs AI - the game class can be extended with 1 more phase - mode selection
 public protocol Player {
     
     // checks whether the player has any pieces left to place
@@ -16,10 +16,10 @@ public protocol Player {
     // returns the number of pieces left to place by the player
     var piecesToPlace: Int { get }
 
-    // Assigns a piece on the board
+    // assigns a piece on the board
     func assignPiece(index: Int) throws -> Bool
 
-    // Removes a piece from the board.
+    // removes a piece from the board
     func removePiece(index: Int) throws
 
     // Moves a piece on the board from index1 to index2. If the adjacentOnly 
@@ -39,7 +39,7 @@ public class HumanPlayer: Player {
     // the number of placed pieces on the board
     private var _placedPieces: Int
 
-    // the number of initial pieces which every placer has
+    // the number of initial pieces which every player has
     private var _piecesToPlace: Int
 
     public init(color: PlayerColor, board: Board) {
@@ -52,18 +52,23 @@ public class HumanPlayer: Player {
 
 // computable properties
 extension HumanPlayer {
+
+    // returns true if the player has any pieces left to place
+    // and false otherwise
     public var hasPiecesToPlace: Bool {
         get {
             return _piecesToPlace > 0
         }
     }
 
+    // returns the number of place pieces by the player
     public var placedPieces: Int {
         get {
             return _placedPieces
         }
     }
 
+    // returns the number of pieces left to be placed by the player
     public var piecesToPlace: Int {
         get {
             return _piecesToPlace

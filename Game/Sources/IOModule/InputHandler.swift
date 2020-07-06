@@ -1,11 +1,11 @@
-// The iutput handler protocol which every class handling input from the user
+// The input handler protocol which every class handling input from the user
 // should implement if it uses the current game package.
 public protocol InputHandler {
 
     // gets the colors for the two players
     func getPlayerColors() throws -> (PlayerColor, PlayerColor)
 
-    // get coordinates for a single piece on the board
+    // gets coordinates for a single piece on the board
     func getSingleCoordinates() throws -> (Int)
 
     // gets coordinates for two pieces on the board
@@ -13,8 +13,8 @@ public protocol InputHandler {
 }
 
 // Console implementation of the input handler protocol. Gets the input from the user 
-// from the console where the game is started. Uses an output handler to display any
-// information or errors to the user.
+// from the standard input. Uses an output handler to display any information or 
+// errors to the user.
 public class ConsoleInputHandler: InputHandler {
 
     // the output handler
@@ -30,8 +30,9 @@ extension ConsoleInputHandler {
 
     // Gets the initial colors of the two players. Currently there are only
     // two colors so one input is enough to determine both colors. 
-    // If EOF has already been reached when readLine() is called and the result is nil 
-    // InputError.failedToGetInitialColors will be thrown.
+    // If EOF has been reached when readLine() is called the first time in 
+    // the beginning of the while loop InputError.failedToGetInitialColors 
+    // will be thrown as the colors can't be initialized.
     public func getPlayerColors() throws -> (PlayerColor, PlayerColor) {
         var player1Color: PlayerColor? = nil
         var player2Color: PlayerColor? = nil
@@ -68,9 +69,9 @@ extension ConsoleInputHandler {
     
     // Gets coordinates for a single piece on the board. This method can be 
     // used for getting coordinate of pieces for assignment and removal where only
-    // the coordinates of a single piece are needed. If EOF has already been 
-    // reached when readLine() is called and the result is nil 
-    // InputError.failedToGetCoordinates will be thrown.
+    // the coordinates of a single piece are needed. If EOF has been reached when 
+    // readLine() is called the first time in the beginning of the while loop 
+    // InputError.failedToGetInitialColors will be thrown as the colors can't be initialized.
     public func getSingleCoordinates() throws -> (Int) {
         var coordinates1d: Int? = nil;
         
@@ -97,18 +98,17 @@ extension ConsoleInputHandler {
 
 extension ConsoleInputHandler {
     
-    // Gets coordinates for double pieces on the board. This method can be 
-    // used for getting coordinates of piece which has to be moved from 1 
-    // tile to another. If EOF has already been reached when readLine() 
-    // is called and the result is nil InputError.failedToGetCoordinates 
-    // will be thrown.
+    // Gets coordinates for double pieces on the board. This method can be used for getting
+    // coordinates of piece which has to be moved from 1 tile to another. If EOF has been 
+    // reached when  readLine() is called the first time in the beginning of the while loop 
+    // InputError.failedToGetInitialColors will be thrown as the colors can't be initialized.
     public func getDoubleCoordinates() throws -> (Int, Int) {
         var coordinates1dFirst: Int? = nil;
         var coordinates1dSecond: Int? = nil;
 
         while let input = readLine() {
             guard input.count == 4 else {
-                outputHandler.display(output: Constants.invalidCoordinates);
+                outputHandler.display(output: Constants.invalidDoubleCoordinates);
                 continue
             }
 

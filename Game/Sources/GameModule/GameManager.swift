@@ -1,8 +1,8 @@
 import IOModule
 
-// The class used for starting different game versions and
+// The class is used for starting different game versions and
 // using different i/o handlers if neccessary. This can be done
-// by implementing the specific protocols (Game, InputHandler and OutputHandler).
+// by implementing the specific protocols (Game, InputHandler or OutputHandler).
 public class GameManager {
 
     private var game: Game?

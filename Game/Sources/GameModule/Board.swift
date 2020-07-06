@@ -4,13 +4,13 @@ import IOModule
 // on the game board.
 public class Board {
 
-    // the number of intersaction on the board
+    // the number of intersections on the board
     private var size: Int
 
-    // the class responsible for visualizing the outputs from the game
+    // the class responsible for visualizing the output from the game to the user
     private var outputHandler: OutputHandler
 
-    // the array of pieces, the size of this array should be the same as the size
+    // the array of pieces, the size of this array should be the same as the size parameter
     private var pieces: [PieceType]
 
     // the array of mills which can be completed on this board
@@ -64,10 +64,10 @@ extension Board {
 extension Board {
 
     // Removes an assigned piece from the board by setting the type of the piece to the 
-    // initial empty type. If the index is invalid BoardError.indexOutOfRange will be thrown,
+    // initial empty type. If the index is invalid BoardError.indexOutOfRange is thrown,
     // if the piece is empty (not assigned by anyone or already removed) or if the piece has 
     // not been assigned by the player who is trying to remove the piece BoardError.failedToRemovePiece 
-    // error will be thrown with appropriate description with information about the error.
+    // error is thrown with appropriate description with information about the error.
     public func remove(index: Int, pieceType: PieceType) throws {
         guard Constants.range.contains(index) else {
             throw BoardError.indexOutOfRange
@@ -99,7 +99,7 @@ extension Board {
                 }
             }
 
-            // this checks whether all opponenet's pieces are part of completed mills
+            // this checks whether all of the opponenet's pieces are part of completed mills
             if !allAreMills {
                 throw BoardError.failedToRemovePiece(description: Constants.tryingToRemoveFromMillWhenAvailable)
             }
@@ -115,11 +115,11 @@ extension Board {
     // initial piece at the first index will be assigned to the empty type and the empty 
     // piece on the second index will be assigned the type of the initial piece. 
     // If the adjacentOnly flag is true it will also check whether the indices are 
-    // adjacent and if they are not BoardError.failedToMovePiece will be thrown.
+    // adjacent and if they are not BoardError.failedToMovePiece is thrown.
     // If any of the two indices passed (from or to) are invalid BoardError.indexOutOfRange 
-    // will be thrown, if the piece which you are trying to move is empty or not assigned 
+    // is thrown, if the piece which you are trying to move is empty or not assigned 
     // by the player who is trying to move the piece or the destination piece is not empty 
-    // BoardError.failedToMovePiece will be thrown with appropriate description. 
+    // BoardError.failedToMovePiece is thrown with appropriate description. 
     // If after moving a piece a mill has been completed the method returns true, 
     // otherwise it returns false.
     public func move(from: Int, to: Int, fromPieceType: PieceType, adjacentOnly: Bool) throws -> Bool {

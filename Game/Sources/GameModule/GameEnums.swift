@@ -18,7 +18,7 @@ public enum PieceType: String {
     case black = "●"
 }
 
-// The states in which the game can be at each moment in time
+// The states in which the game can be at each moment in time.
 public enum GameState {
     case placingPieces
     case movingPieces

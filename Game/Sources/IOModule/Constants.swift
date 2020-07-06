@@ -36,7 +36,8 @@ extension ConsoleInputHandler
 
         // Console messages
         static let enterColorsPrompt = "Please enter the color of the pools for player 1 [black/white]:"
-        static let invalidColors = "Invalid input for initial colors, please enter either [black/white]."
+        static let invalidColors = "Invalid input for initial colors, please enter either [black/white]!"
         static let invalidCoordinates = "The coordinates you have entered do not exist on this board, please try again!"
+        static let invalidDoubleCoordinates = "Please enter two coordinates for moving a piece!"
     }
 }

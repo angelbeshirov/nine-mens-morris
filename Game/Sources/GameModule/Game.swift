@@ -1,12 +1,12 @@
 import IOModule
 
-// The game protocol with all 3 main phases of the game
+// The game protocol with all phases of the game
 public protocol Game {
 
     // the next player
     var nextPlayer: PlayerType { get }
 
-    // the current game state
+    // the current state of the game
     var gameState: GameState { get }
 
     // starts the placing phase
@@ -24,7 +24,7 @@ public protocol Game {
 
 // Console implementation of the nine-mens-morris game, specificed by the 
 // Game interface. If the input entered by the user is invalid it is being 
-// handled in the methods below and messages with information about the it 
+// handled in the methods below and messages with information about it 
 // are being displayed to the user using the output handler.
 public class ConsoleGame: Game {
 
@@ -44,7 +44,7 @@ public class ConsoleGame: Game {
 
     // Initializes the console game and gets the input of the player's colors
     // If an error occurs while getting the user input about the colors, the error is 
-    // propagated to the caller in this case the GameManager.
+    // propagated to the caller of this initializer (e.g. GameManager).
     public init(inputHandler: InputHandler, outputHandler: OutputHandler) throws {
         self.inputHandler = inputHandler
         self.outputHandler = outputHandler
@@ -55,7 +55,7 @@ public class ConsoleGame: Game {
         player2 = HumanPlayer(color: colors.1, board: board)
         currentPlayer = PlayerType.player1
 
-        // display user info about the game initialization
+        // displays information to the user about the game initialization
         outputHandler.display(output: Constants.gameStarted)
         outputHandler.display(output:
             "\(currentPlayer.rawValue) has the \(colors.0.rawValue) pieces, \(nextPlayer.rawValue) has the \(colors.1.rawValue) pieces")
@@ -85,7 +85,7 @@ extension ConsoleGame {
                 return GameState.placingPieces
             } else if player1.placedPieces > 3 && player2.placedPieces > 3 {
                 return GameState.movingPieces
-            } else if player1.placedPieces == 3 || player2.placedPieces == 3 {
+            } else if (player1.placedPieces >= 3 && player2.placedPieces >= 3) {
                 return GameState.flyingPieces
             } else {
                 return GameState.gameOver
@@ -98,7 +98,7 @@ extension ConsoleGame {
 extension ConsoleGame {
 
     // Starts the piece placing phase of the game. In this phase both players have
-    // to place their pieces on the board, by selecting non-assigned indices. If after 
+    // to place their pieces on the board, by choosing non-assigned indices. If after 
     // piece placement a mill has been completed, the player who completed it gets to 
     // remove one of the opponent's pieces.
     public func startPlacingPhase() throws {
@@ -208,7 +208,7 @@ extension ConsoleGame {
 
     // Starts the flying phase of the game. In this phase the player with 3 pieces
     // can 'fly' on the board, by not having to select adjacent indices as opposed 
-    // to the other player, who stil has to enter adjacent indices to move pieces on.
+    // to the other player, who stil has to choose adjacent indices to move pieces on.
     public func startFlyingPhase() throws {
         let playerLeftWith3Pieces = currentPlayerObject.placedPieces == 3 ? currentPlayer : nextPlayer
         outputHandler.display(output: "\(playerLeftWith3Pieces.rawValue) you have 3 pieces left, starting phase 3 - flying")
@@ -219,8 +219,9 @@ extension ConsoleGame {
                 if !hasToRemove {
                     outputHandler.display(output: "\(currentPlayer.rawValue) please enter coordinates to move a piece:")
                     let coordinates: (Int, Int) = try inputHandler.getDoubleCoordinates()
-                    // is the current player the one with 3 pieces, if no then adjacent becomes true
-                    let adjacent: Bool = playerLeftWith3Pieces != currentPlayer
+
+                    // does the current player have 3 pieces left? if no then adjacent is set to true
+                    let adjacent: Bool = currentPlayerObject.placedPieces != 3
 
                     hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, 
                                                                     index2: coordinates.1, 
@@ -265,7 +266,7 @@ extension ConsoleGame {
 
     // Function which handles the game over phase, by displaying the winner and 
     // the final scores. If the game is not in the GameState.gameOver state, 
-    // GameError.gameIsNotOver is thrown, this should not happen with the current 
+    // GameError.gameIsNotOver is thrown, this will not happen with the current 
     // implementation.
     public func handleGameOverPhase() throws {
         guard gameState == GameState.gameOver else {
@@ -274,12 +275,12 @@ extension ConsoleGame {
 
         let winner: PlayerType = player1.placedPieces > player2.placedPieces ? .player1 : .player2
 
-        outputHandler.display(output: Constants.screenSeparator)
         outputHandler.display(output: Constants.gameOver)
         outputHandler.display(output: "Congratulations \(winner.rawValue) you are the winner!")
-        outputHandler.display(output: 
-            "Final game scores are: \(PlayerType.player1.rawValue) with score \(player1.placedPieces) ")
-        outputHandler.display(output: "and \(PlayerType.player2.rawValue) with score \(player2.placedPieces)!")
+        let finalOutputScores = "Final game scores are: \(PlayerType.player1.rawValue) with score \(player1.placedPieces) " +
+                                "and \(PlayerType.player2.rawValue) with score \(player2.placedPieces)."
+        outputHandler.display(output: finalOutputScores)
+        outputHandler.display(output: Constants.screenSeparator)
     }
 }
 
