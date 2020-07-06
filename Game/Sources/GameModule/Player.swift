@@ -1,7 +1,34 @@
 import IOModule
 
-// Object representation of a player.
-public class Player {
+// The player protocol which every player object should implement used in some game implementation.
+// By abstracting this class behind a protocol, we allow different type of users to be created and
+// used in the game implementation. One example can be 2 game modes:
+// 1. human player vs human player
+// 2. human player vs AI
+public protocol Player {
+    
+    // checks whether the player has any pieces left to place
+    var hasPiecesToPlace: Bool { get }
+
+    // returns the number of placed pieces by the player
+    var placedPieces: Int { get }
+
+    // returns the number of pieces left to place by the player
+    var piecesToPlace: Int { get }
+
+    // Assigns a piece on the board
+    func assignPiece(index: Int) throws -> Bool
+
+    // Removes a piece from the board.
+    func removePiece(index: Int) throws
+
+    // Moves a piece on the board from index1 to index2. If the adjacentOnly 
+    // flag is true the indices must be adjacent.
+    func movePiece(index1: Int, index2: Int, adjacentOnly: Bool) throws -> Bool
+}
+
+// Object representation of a human player.
+public class HumanPlayer: Player {
 
     // the color which this player uses to mark the pieces which he has placed
     private var color: PlayerColor
@@ -24,20 +51,20 @@ public class Player {
 }
 
 // computable properties
-extension Player {
-    var hasPiecesToPlace: Bool {
+extension HumanPlayer {
+    public var hasPiecesToPlace: Bool {
         get {
             return _piecesToPlace > 0
         }
     }
 
-    var placedPieces: Int {
+    public var placedPieces: Int {
         get {
             return _placedPieces
         }
     }
 
-    var piecesToPlace: Int {
+    public var piecesToPlace: Int {
         get {
             return _piecesToPlace
         }
@@ -46,10 +73,10 @@ extension Player {
 
 // Functions for assigning, removing and moving pieces. All errors thrown 
 // by the board are being propagated to the caller for handling.
-extension Player {
+extension HumanPlayer {
 
     // assigns a piece on the board by using the color of the player
-    public func assign(index: Int) throws -> Bool {
+    public func assignPiece(index: Int) throws -> Bool {
         let formedMill: Bool = try board.assign(index: index, color: self.color)
         self._placedPieces += 1
         self._piecesToPlace -= 1
@@ -65,7 +92,7 @@ extension Player {
     // moves a piece on the board
     public func movePiece(index1: Int, 
                           index2: Int, 
-                          adjacentOnly: Bool = true) throws -> Bool {
+                          adjacentOnly: Bool) throws -> Bool {
         return try board.move(from: index1, 
                               to: index2, 
                               fromPieceType: color.pieceType, 

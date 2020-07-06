@@ -51,8 +51,8 @@ public class ConsoleGame: Game {
         let colors: (PlayerColor, PlayerColor) = try inputHandler.getPlayerColors()
 
         board = Board(_size: Constants.boardSize, outputHandler: outputHandler)
-        player1 = Player(color: colors.0, board: board)
-        player2 = Player(color: colors.1, board: board)
+        player1 = HumanPlayer(color: colors.0, board: board)
+        player2 = HumanPlayer(color: colors.1, board: board)
         currentPlayer = PlayerType.player1
 
         // display user info about the game initialization
@@ -111,7 +111,7 @@ extension ConsoleGame {
                     outputHandler.display(output:"\(currentPlayer.rawValue) please enter coordinates to place a piece:")
                     let coordinates = try inputHandler.getSingleCoordinates()
                     
-                    hasToRemove = try currentPlayerObject.assign(index: coordinates)
+                    hasToRemove = try currentPlayerObject.assignPiece(index: coordinates)
                     outputHandler.display(output:
                         "\(currentPlayer.rawValue), you have \(currentPlayerObject.piecesToPlace) pieces left to place")
                     board.visualize()
@@ -167,7 +167,7 @@ extension ConsoleGame {
                 if !hasToRemove {
                     outputHandler.display(output: "\(currentPlayer.rawValue) please enter coordinates to move a piece:")
                     let coordinates: (Int, Int) = try inputHandler.getDoubleCoordinates()
-                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, index2: coordinates.1)
+                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, index2: coordinates.1, adjacentOnly: true)
                     board.visualize()
                 }
 

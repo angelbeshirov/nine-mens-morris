@@ -2,7 +2,6 @@
 // All constants are defined in a internal struct added by an extension
 // for the particular class. This way we won't have some random
 // structs defined at the global level thus polluting it.
-
 extension ConsoleInputHandler 
 {
     struct Constants 

@@ -7,7 +7,7 @@ public class Board {
     // the number of intersaction on the board
     private var size: Int
 
-    // the class responsible for handling the visualizing the outputs from the game
+    // the class responsible for visualizing the outputs from the game
     private var outputHandler: OutputHandler
 
     // the array of pieces, the size of this array should be the same as the size
