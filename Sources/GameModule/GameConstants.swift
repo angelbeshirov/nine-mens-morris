@@ -1,5 +1,5 @@
 // Here constants for the classes in this module are defined.
-// All constants are defined in a internal struct added by an extension
+// All constants are defined in an internal struct added by an extension
 // for the particular class. This way we won't have some random
 // structs defined at the global level thus polluting it.
 

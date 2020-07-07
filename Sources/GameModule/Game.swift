@@ -333,7 +333,7 @@ extension ConsoleGame {
             return GameState.placingPieces
         } else if !player1.hasValidMoves() || !player2.hasValidMoves() {
             // one of the two players has more than 3 placed pieces, 0 pieces to 
-            // place and all his pieces blocked thus can't make a valid move -> game over
+            // place and all his pieces are blocked thus can't make a valid move -> game over
             return GameState.gameOver
         } else if player1.placedPieces > 3 && player2.placedPieces > 3 {
             return GameState.movingPieces
