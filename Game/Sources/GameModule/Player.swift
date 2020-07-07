@@ -22,9 +22,11 @@ public protocol Player {
     // removes a piece from the board
     func removePiece(index: Int) throws
 
-    // Moves a piece on the board from index1 to index2. If the adjacentOnly 
-    // flag is true the indices must be adjacent.
-    func movePiece(index1: Int, index2: Int, adjacentOnly: Bool) throws -> Bool
+    // moves a piece on the board from index1 to index2 
+    func movePiece(index1: Int, index2: Int) throws -> Bool
+
+    // predicate to check whether the player is able to make a valid move
+    func hasValidMoves() -> Bool
 }
 
 // Object representation of a human player.
@@ -39,9 +41,10 @@ public class HumanPlayer: Player {
     // the number of placed pieces on the board
     private var _placedPieces: Int
 
-    // the number of initial pieces which every player has
+    // the number of initial pieces which every player has to place
     private var _piecesToPlace: Int
 
+    // initializer
     public init(color: PlayerColor, board: Board) {
         self.color = color
         self.board = board
@@ -61,7 +64,7 @@ extension HumanPlayer {
         }
     }
 
-    // returns the number of place pieces by the player
+    // returns the number of placed pieces by the player
     public var placedPieces: Int {
         get {
             return _placedPieces
@@ -82,10 +85,10 @@ extension HumanPlayer {
 
     // assigns a piece on the board by using the color of the player
     public func assignPiece(index: Int) throws -> Bool {
-        let formedMill: Bool = try board.assign(index: index, color: self.color)
+        let completedMill: Bool = try board.assign(index: index, color: self.color)
         self._placedPieces += 1
         self._piecesToPlace -= 1
-        return formedMill
+        return completedMill
     }
 
     // removes a piece from the board
@@ -94,13 +97,31 @@ extension HumanPlayer {
         self._placedPieces -= 1
     }
 
-    // moves a piece on the board
+    // Moves a piece on the board. If the player has 3 pieces left then the
+    // selected indices can be non-adjacent, otherwise they must be adjacent.
     public func movePiece(index1: Int, 
-                          index2: Int, 
-                          adjacentOnly: Bool) throws -> Bool {
+                          index2: Int) throws -> Bool {
+        var adjacentOnly = true
+        if !hasPiecesToPlace && placedPieces == 3 {
+            adjacentOnly = false
+        }
         return try board.move(from: index1, 
                               to: index2, 
-                              fromPieceType: color.pieceType, 
+                              playerPieceType: color.pieceType, 
                               adjacentOnly: adjacentOnly)
+    }
+}
+
+extension HumanPlayer {
+
+    // function to check whether the player has any valid moves.
+    public func hasValidMoves() -> Bool {
+        // player can fly or the player still has pieces left to place
+        if placedPieces == 3 || piecesToPlace > 0 {
+            return true
+        }
+
+        // if the piece type is blocked no valid moves exist, the negation is returned
+        return !board.checkIfPieceTypeIsBlocked(pieceType: color.pieceType) 
     }
 }

@@ -8,5 +8,5 @@ enum BoardError: Error {
 
 // Game errors
 enum GameError: Error {
-    case gameIsNotOver
+    case wrongGameState
 }

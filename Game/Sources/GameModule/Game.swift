@@ -25,7 +25,10 @@ public protocol Game {
 // Console implementation of the nine-mens-morris game, specificed by the 
 // Game interface. If the input entered by the user is invalid it is being 
 // handled in the methods below and messages with information about it 
-// are being displayed to the user using the output handler.
+// are being displayed to the user using the output handler. If a method for 
+// handling a particular game phase is started and the game state does not 
+// correspond to this game phase GameError.wrongGameState is thrown.
+// Note: This will not happen with the current implementation of the game manager.
 public class ConsoleGame: Game {
 
     // the two players
@@ -43,7 +46,7 @@ public class ConsoleGame: Game {
     private var outputHandler: OutputHandler
 
     // Initializes the console game and gets the input of the player's colors
-    // If an error occurs while getting the user input about the colors, the error is 
+    // If an error occurs while getting the user input for the colors, the error is 
     // propagated to the caller of this initializer (e.g. GameManager).
     public init(inputHandler: InputHandler, outputHandler: OutputHandler) throws {
         self.inputHandler = inputHandler
@@ -80,16 +83,7 @@ extension ConsoleGame {
     // computes the game state based on the player's pieces
     public var gameState: GameState {
         get {
-            // all pieces have been placed when this is false
-            if player1.hasPiecesToPlace || player2.hasPiecesToPlace { 
-                return GameState.placingPieces
-            } else if player1.placedPieces > 3 && player2.placedPieces > 3 {
-                return GameState.movingPieces
-            } else if (player1.placedPieces >= 3 && player2.placedPieces >= 3) {
-                return GameState.flyingPieces
-            } else {
-                return GameState.gameOver
-            }
+            return computeGameState()
         }
     }
 }
@@ -102,6 +96,10 @@ extension ConsoleGame {
     // piece placement a mill has been completed, the player who completed it gets to 
     // remove one of the opponent's pieces.
     public func startPlacingPhase() throws {
+        guard gameState == GameState.placingPieces else {
+            throw GameError.wrongGameState
+        }
+
         var hasToRemove: Bool = false
         board.visualize()
 
@@ -159,6 +157,10 @@ extension ConsoleGame {
     // the piece a mill has been completed, the player who completed it gets to remove 
     // one of the opponent's pieces.
     public func startMovingPhase() throws {
+        guard gameState == GameState.movingPieces else {
+            throw GameError.wrongGameState
+        }
+
         var hasToRemove: Bool = false
         outputHandler.display(output: Constants.startingMovingPhase)
 
@@ -167,7 +169,9 @@ extension ConsoleGame {
                 if !hasToRemove {
                     outputHandler.display(output: "\(currentPlayer.rawValue) please enter coordinates to move a piece:")
                     let coordinates: (Int, Int) = try inputHandler.getDoubleCoordinates()
-                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, index2: coordinates.1, adjacentOnly: true)
+
+                    // the logic whether the indices must be adjacent is encapsulated in the HumanPlayer class
+                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, index2: coordinates.1)
                     board.visualize()
                 }
 
@@ -210,6 +214,10 @@ extension ConsoleGame {
     // can 'fly' on the board, by not having to select adjacent indices as opposed 
     // to the other player, who stil has to choose adjacent indices to move pieces on.
     public func startFlyingPhase() throws {
+        guard gameState == GameState.flyingPieces else {
+            throw GameError.wrongGameState
+        }
+
         let playerLeftWith3Pieces = currentPlayerObject.placedPieces == 3 ? currentPlayer : nextPlayer
         outputHandler.display(output: "\(playerLeftWith3Pieces.rawValue) you have 3 pieces left, starting phase 3 - flying")
         var hasToRemove: Bool = false;
@@ -220,13 +228,9 @@ extension ConsoleGame {
                     outputHandler.display(output: "\(currentPlayer.rawValue) please enter coordinates to move a piece:")
                     let coordinates: (Int, Int) = try inputHandler.getDoubleCoordinates()
 
-                    // does the current player have 3 pieces left? if no then adjacent is set to true
-                    let adjacent: Bool = currentPlayerObject.placedPieces != 3
-
-                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, 
-                                                                    index2: coordinates.1, 
-                                                                    adjacentOnly: adjacent)
-                        board.visualize()
+                    // the logic whether the indices must be adjacent is encapsulated in the HumanPlayer class
+                    hasToRemove = try currentPlayerObject.movePiece(index1: coordinates.0, index2: coordinates.1)
+                    board.visualize()
                 }
 
                 // if completed a mill and has to remove an opponent's piece
@@ -264,23 +268,42 @@ extension ConsoleGame {
 // phase 4
 extension ConsoleGame {
 
-    // Function which handles the game over phase, by displaying the winner and 
-    // the final scores. If the game is not in the GameState.gameOver state, 
-    // GameError.gameIsNotOver is thrown, this will not happen with the current 
-    // implementation.
+    // Function which handles the game over phase, by displaying game result, 
+    // the winner if there is one and the final scores. 
     public func handleGameOverPhase() throws {
         guard gameState == GameState.gameOver else {
-            throw GameError.gameIsNotOver
+            throw GameError.wrongGameState
         }
 
-        let winner: PlayerType = player1.placedPieces > player2.placedPieces ? .player1 : .player2
-
         outputHandler.display(output: Constants.gameOver)
-        outputHandler.display(output: "Congratulations \(winner.rawValue) you are the winner!")
+        let winner: PlayerType? = getGameWinner()
+
+        if let gameWinner = winner {
+            outputHandler.display(output: "Congratulations \(gameWinner.rawValue) you are the winner!")
+        } else {
+            outputHandler.display(output: "The game result is a draw!")
+        }
+        
         let finalOutputScores = "Final game scores are: \(PlayerType.player1.rawValue) with score \(player1.placedPieces) " +
                                 "and \(PlayerType.player2.rawValue) with score \(player2.placedPieces)."
         outputHandler.display(output: finalOutputScores)
         outputHandler.display(output: Constants.screenSeparator)
+    }
+
+    // private helper function to get the game winner based on final scores
+    // when the handleGameOverPhase starts
+    private func getGameWinner() -> PlayerType? {
+        var winner: PlayerType? = nil;
+
+        if player1.hasValidMoves() && !player2.hasValidMoves() {
+            winner = .player1
+        } else if !player1.hasValidMoves() && player2.hasValidMoves() {
+            winner = .player2
+        } else if player1.placedPieces != player2.placedPieces {
+            winner = player1.placedPieces > player2.placedPieces ? .player1 : .player2
+        }
+
+        return winner;
     }
 }
 
@@ -300,5 +323,24 @@ extension ConsoleGame {
     // function to return player object based on the type of the player
     private func getPlayerObject(playerType: PlayerType) -> Player {
         return playerType == PlayerType.player1 ? player1 : player2
+    }
+
+    // computes the current game state based on the player's pieces
+    // and their position
+    private func computeGameState() -> GameState {
+        // all pieces have been placed when this is false
+        if player1.hasPiecesToPlace || player2.hasPiecesToPlace { 
+            return GameState.placingPieces
+        } else if !player1.hasValidMoves() || !player2.hasValidMoves() {
+            // one of the two players has more than 3 placed pieces, 0 pieces to 
+            // place and all his pieces blocked thus can't make a valid move -> game over
+            return GameState.gameOver
+        } else if player1.placedPieces > 3 && player2.placedPieces > 3 {
+            return GameState.movingPieces
+        } else if (player1.placedPieces >= 3 && player2.placedPieces >= 3) {
+            return GameState.flyingPieces
+        } else {
+            return GameState.gameOver
+        }
     }
 }

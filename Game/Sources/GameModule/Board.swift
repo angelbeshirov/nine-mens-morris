@@ -32,7 +32,7 @@ public class Board {
 
 extension Board {
 
-    // Assignes a color to a particular piece on the table which is accessed using 
+    // Assigns a color to a particular piece on the table which is accessed using 
     // it's index. If the index is invalid BoardError.indexOutOfRange is thrown, 
     // if the piece has already been assigned BoardError.failedToAssignPiece is thrown 
     // with appropriate description for the error. If after assignment a mill has been
@@ -113,7 +113,7 @@ extension Board {
 
     // Moves an assigned piece from one index to another unassigned index thus the 
     // initial piece at the first index will be assigned to the empty type and the empty 
-    // piece on the second index will be assigned the type of the initial piece. 
+    // piece on the second index will be assigned the type of the piece on the first index. 
     // If the adjacentOnly flag is true it will also check whether the indices are 
     // adjacent and if they are not BoardError.failedToMovePiece is thrown.
     // If any of the two indices passed (from or to) are invalid BoardError.indexOutOfRange 
@@ -122,7 +122,7 @@ extension Board {
     // BoardError.failedToMovePiece is thrown with appropriate description. 
     // If after moving a piece a mill has been completed the method returns true, 
     // otherwise it returns false.
-    public func move(from: Int, to: Int, fromPieceType: PieceType, adjacentOnly: Bool) throws -> Bool {
+    public func move(from: Int, to: Int, playerPieceType: PieceType, adjacentOnly: Bool) throws -> Bool {
         guard Constants.range.contains(from) && Constants.range.contains(to) else {
             throw BoardError.indexOutOfRange
         }
@@ -131,7 +131,7 @@ extension Board {
             throw BoardError.failedToMovePiece(description: Constants.tryingToMoveEmpty)
         }
 
-        guard pieces[from] == fromPieceType else {
+        guard pieces[from] == playerPieceType else {
             throw BoardError.failedToMovePiece(description: Constants.tryingToMoveNotAssignedByMe)
         }
 
@@ -187,6 +187,30 @@ extension Board {
         "7   \(pieces[21].rawValue)-----------\(pieces[22].rawValue)-----------\(pieces[23].rawValue)\n"
 
         outputHandler.display(output: boardTextVisualization)
+    }
+}
+
+extension Board {
+
+    // Boolean function to check whether a particular piece type has all it's
+    // adjacent indices assigned some piece type different than the empty one.
+    public func checkIfPieceTypeIsBlocked(pieceType: PieceType) -> Bool {
+        let playerIndices: [Int] = pieces.enumerated()
+                                         .filter { (idx, type) in type == pieceType }
+                                         .map { (idx, type) in return idx }
+
+        let freeNeighbours = playerIndices
+                             .filter { (idx) in Constants.nodeNeighbours[idx]
+                                                .filter { (neighbourIdx) in pieces[neighbourIdx] == PieceType.empty }.count > 0 }
+        
+        // If the free neighbors array is empty then the player's piece type has all it's 
+        // adjacent indices blocked (assigned some value different than the empty one), 
+        // otherwise a free index exists.
+        //
+        // Note: It is the player's class responsibiltiy to apply the logic whether 
+        // the player can move to an adjacent index only or 'fly' around, the board class is
+        // not responsible for this logic.
+        return freeNeighbours.isEmpty
     }
 }
 

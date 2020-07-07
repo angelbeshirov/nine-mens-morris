@@ -40,15 +40,25 @@ extension GameManager {
         }
 
         do {
+            // if the game is not initialized correctly error will be thrown
             try game = ConsoleGame(inputHandler: consoleInputHandler, outputHandler: consoleOutputHandler)
-            try game!.startPlacingPhase()
-            try game!.startMovingPhase()
-            try game!.startFlyingPhase()
+
+            // main game loop
+            while game?.gameState != GameState.gameOver {
+                switch game?.gameState {
+                case .placingPieces: try game!.startPlacingPhase()
+                case .movingPieces: try game!.startMovingPhase()
+                case .flyingPieces: try game!.startFlyingPhase()
+                default: throw GameError.wrongGameState
+                }
+            }
+
             try game!.handleGameOverPhase()
+
         } catch let inputError as InputError {
             consoleOutputHandler.displayError(error: "Input error: \(inputError)")
-        } catch GameError.gameIsNotOver {
-            consoleOutputHandler.displayError(error: "Internal error: Game is not in game over state!")
+        } catch GameError.wrongGameState {
+            consoleOutputHandler.displayError(error: "Internal error: Game is in the wrong state!")
         } catch {
             // handle all unknown errors
             consoleOutputHandler.displayError(error: "Unknown fatal error: \(error)")

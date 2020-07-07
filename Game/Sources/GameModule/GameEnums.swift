@@ -1,7 +1,7 @@
 import IOModule
 
 // Maps the color of a player to the type of piece
-// he will use when assigning pieces
+// which will be used when assigning pieces
 extension PlayerColor {
     var pieceType: PieceType {
         switch self {

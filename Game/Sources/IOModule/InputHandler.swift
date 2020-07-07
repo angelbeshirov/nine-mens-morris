@@ -1,5 +1,5 @@
 // The input handler protocol which every class handling input from the user
-// should implement if it uses the current game package.
+// should implement if it has to be used by the existing classes in this package.
 public protocol InputHandler {
 
     // gets the colors for the two players
@@ -71,7 +71,8 @@ extension ConsoleInputHandler {
     // used for getting coordinate of pieces for assignment and removal where only
     // the coordinates of a single piece are needed. If EOF has been reached when 
     // readLine() is called the first time in the beginning of the while loop 
-    // InputError.failedToGetInitialColors will be thrown as the colors can't be initialized.
+    // InputError.failedToGetCoordinates will be thrown as the single coordinates 
+    // can't be retrieved.
     public func getSingleCoordinates() throws -> (Int) {
         var coordinates1d: Int? = nil;
         
@@ -82,7 +83,7 @@ extension ConsoleInputHandler {
                 coordinates1d = transformedCoordinates
                 break
             } else {
-                // the input doesn't have a mapping in the coordinateMapping dict
+                // the input doesn't have a mapping in the coordinateMapping dict (invalid coordinates)
                 outputHandler.displayError(error: Constants.invalidCoordinates)
             }
         }
@@ -99,9 +100,9 @@ extension ConsoleInputHandler {
 extension ConsoleInputHandler {
     
     // Gets coordinates for double pieces on the board. This method can be used for getting
-    // coordinates of piece which has to be moved from 1 tile to another. If EOF has been 
-    // reached when  readLine() is called the first time in the beginning of the while loop 
-    // InputError.failedToGetInitialColors will be thrown as the colors can't be initialized.
+    // coordinates of piece which has to be moved from 1 index to another. If EOF has been 
+    // reached when readLine() is called the first time in the beginning of the while loop 
+    // InputError.failedToGetCoordinates will be thrown as the double coordinates can't be set.
     public func getDoubleCoordinates() throws -> (Int, Int) {
         var coordinates1dFirst: Int? = nil;
         var coordinates1dSecond: Int? = nil;
@@ -121,7 +122,7 @@ extension ConsoleInputHandler {
                 break
             } else {
                 // one of the two coordinates from the input doesn't have 
-                // a mapping in the coordinateMapping dict
+                // a mapping in the coordinateMapping dict (invalid coordinates)
                 outputHandler.displayError(error: Constants.invalidCoordinates);
             }
         }

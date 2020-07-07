@@ -34,7 +34,7 @@ extension Board {
             [14, 22]
         ]
         
-        // the indices which can form a valid mill
+        // the indices which can form a valid mills
         static let millIndices = [
             [0, 1, 2], // Horizontal mills
             [3, 4, 5],
